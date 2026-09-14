@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة تسعير المجروشات</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{
+  --bg:#EDF0EF;
+  --panel:#FFFFFF;
+  --panel-2:#F5F7F6;
+  --ink:#1B2226;
+  --ink-soft:#4C565B;
+  --muted:#8A9297;
+  --line:#DBE1DF;
+  --line-strong:#C3CBC8;
+  --amber:#D9762A;
+  --amber-dark:#B85E1B;
+  --amber-tint:#FBEADB;
+  --grade-a:#2E6F8E;
+  --grade-a-tint:#E4EFF3;
+  --grade-b:#4C7A5E;
+  --grade-b-tint:#E7F0EA;
+  --danger:#B14343;
+  --radius-s:4px;
+  --radius-m:8px;
+  --shadow-panel:0 1px 2px rgba(20,26,28,0.06), 0 1px 0 rgba(20,26,28,0.04);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Tajawal', sans-serif;
+  font-weight:400;
+  line-height:1.5;
+  min-height:100vh;
+}
+::selection{background:var(--amber-tint); color:var(--amber-dark);}
+input,button,select{font-family:inherit;}
+.app-shell{
+  max-width:1180px;
+  margin:0 auto;
+  padding:0 20px 64px;
+}
+/* ---------- Header ---------- */
+.app-header{
+  padding:28px 0 20px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:20px;
+  border-bottom:1px solid var(--line);
+  margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.app-title-block{display:flex; align-items:center; gap:14px;}
+.brand-mark{
+  width:44px; height:44px; border-radius:var(--radius-s);
+  background:linear-gradient(155deg, var(--amber) 0%, var(--amber-dark) 100%);
+  display:flex; align-items:center; justify-content:center;
+  flex-shrink:0;
+}
+.brand-mark svg{width:24px; height:24px;}
+.app-title{
+  font-size:22px; font-weight:900; margin:0; letter-spacing:-0.01em;
+}
+.app-subtitle{
+  font-size:13px; color:var(--ink-soft); margin:2px 0 0;
+}
+.header-stats{
+  display:flex; gap:26px;
+}
+.header-stat{text-align:center;}
+.header-stat .num{font-size:20px; font-weight:900; color:var(--amber-dark); display:block; font-variant-numeric:tabular-nums;}
+.header-stat .lbl{font-size:11.5px; color:var(--muted);}
+
+/* ---------- Tabs ---------- */
+.tabs{
+  display:flex;
+  gap:4px;
+  margin-bottom:22px;
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;
+}
+.tab-btn{
+  appearance:none; border:none; background:none; cursor:pointer;
+  padding:11px 16px; font-size:14.5px; font-weight:700; color:var(--ink-soft);
+  border-bottom:2.5px solid transparent;
+  white-space:nowrap;
+  transition:color .15s ease, border-color .15s ease;
+}
+.tab-btn:hover{color:var(--ink);}
+.tab-btn.active{color:var(--amber-dark); border-bottom-color:var(--amber);}
+
+.view{display:none;}
+.view.active{display:block;}
+
+/* ---------- Panels ---------- */
+.panel{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:var(--radius-m);
+  box-shadow:var(--shadow-panel);
+  padding:20px;
+  margin-bottom:18px;
+}
+.panel-head{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:14px; margin-bottom:14px; flex-wrap:wrap;
+}
+.panel-title{font-size:16px; font-weight:900; margin:0;}
+.panel-desc{font-size:13px; color:var(--ink-soft); margin:4px 0 0;}
+
+/* ---------- Controls ---------- */
+.toolbar{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+.search-box{
+  position:relative; flex:1; min-width:200px; max-width:340px;
+}
+.search-box input{
+  width:100%; padding:9px 14px; border:1px solid var(--line-strong);
+  border-radius:var(--radius-s); font-size:13.5px; background:var(--panel-2);
+  outline:none; transition:border-color .15s ease;
+}
+.search-box input:focus{border-color:var(--amber);}
+.btn{
+  appearance:none; border:1px solid var(--line-strong); background:var(--panel);
+  color:var(--ink); padding:9px 16px; border-radius:var(--radius-s);
+  font-size:13.5px; font-weight:700; cursor:pointer; white-space:nowrap;
+  transition:background .15s ease, border-color .15s ease, transform .05s ease;
+  display:inline-flex; align-items:center; gap:6px;
+}
+.btn:hover{border-color:var(--ink-soft);}
+.btn:active{transform:translateY(1px);}
+.btn-primary{background:var(--amber); border-color:var(--amber); color:#fff;}
+.btn-primary:hover{background:var(--amber-dark); border-color:var(--amber-dark);}
+.btn-ghost{border-color:transparent; background:transparent; color:var(--ink-soft);}
+.btn-ghost:hover{color:var(--ink); background:var(--panel-2);}
+.btn-danger{color:var(--danger); border-color:var(--line-strong);}
+.btn-danger:hover{border-color:var(--danger); background:#FBEEEE;}
+.btn-sm{padding:6px 11px; font-size:12.5px;}
+.btn[disabled]{opacity:.45; cursor:not-allowed;}
+
+/* ---------- Table ---------- */
+.table-wrap{
+  overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-s);
+}
+table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px;}
+thead th{
+  background:var(--panel-2); color:var(--ink-soft);
+  font-weight:700; font-size:12px;
+  text-align:right; padding:10px 12px; border-bottom:1px solid var(--line);
+  position:sticky; top:0; white-space:nowrap;
+}
+tbody td{
+  padding:8px 12px; border-bottom:1px solid var(--line);
+  vertical-align:middle;
+}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--panel-2);}
+.code-cell{font-variant-numeric:tabular-nums; color:var(--ink-soft); font-size:12.5px;}
+.mat-tag{
+  display:inline-flex; flex-direction:column; line-height:1.3;
+}
+.mat-tag .mn{font-weight:700; font-size:13px;}
+.mat-tag .mc{font-size:11px; color:var(--muted);}
+
+.pct-input{
+  width:72px; padding:6px 8px; border:1px solid var(--line-strong);
+  border-radius:var(--radius-s); font-size:13px; text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.pct-input.grade-a{border-color:#BCD6E1; background:var(--grade-a-tint);}
+.pct-input.grade-a:focus{outline:none; border-color:var(--grade-a);}
+.pct-input.grade-b{border-color:#C6DCCC; background:var(--grade-b-tint);}
+.pct-input.grade-b:focus{outline:none; border-color:var(--grade-b);}
+
+.grade-stack{display:flex; flex-direction:column; gap:6px;}
+.grade-row{display:flex; align-items:center; gap:6px; font-size:12px;}
+.grade-chip{
+  width:18px; height:18px; border-radius:4px; display:flex; align-items:center; justify-content:center;
+  font-size:10.5px; font-weight:900; color:#fff; flex-shrink:0;
+}
+.grade-chip.a{background:var(--grade-a);}
+.grade-chip.b{background:var(--grade-b);}
+
+.price-input{
+  width:110px; padding:6px 10px; border:1px solid var(--line-strong);
+  border-radius:var(--radius-s); font-size:13.5px; text-align:center;
+  font-variant-numeric:tabular-nums;
+}
+.price-input:focus{outline:none; border-color:var(--amber);}
+
+.row-check{width:16px; height:16px; accent-color:var(--amber);}
+
+.icon-btn{
+  border:none; background:none; cursor:pointer; color:var(--muted);
+  padding:4px; border-radius:4px; display:inline-flex;
+}
+.icon-btn:hover{color:var(--danger); background:#FBEEEE;}
+.icon-btn svg{width:16px; height:16px;}
+
+.empty-note{
+  text-align:center; color:var(--muted); font-size:13px; padding:30px 10px;
+}
+
+.toast{
+  position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--ink); color:#fff; padding:11px 20px; border-radius:var(--radius-s);
+  font-size:13.5px; font-weight:700; opacity:0; pointer-events:none;
+  transition:opacity .2s ease, transform .2s ease; z-index:200; box-shadow:0 6px 18px rgba(0,0,0,.2);
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+.badge{
+  display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700;
+}
+.badge.a{background:var(--grade-a-tint); color:var(--grade-a);}
+.badge.b{background:var(--grade-b-tint); color:var(--grade-b);}
+
+.summary-strip{
+  display:flex; gap:14px; flex-wrap:wrap; margin-bottom:14px;
+}
+.summary-card{
+  flex:1; min-width:140px; background:var(--panel-2); border:1px solid var(--line);
+  border-radius:var(--radius-s); padding:12px 14px;
+}
+.summary-card .n{font-size:19px; font-weight:900; font-variant-numeric:tabular-nums;}
+.summary-card .l{font-size:12px; color:var(--muted); margin-top:2px;}
+
+.field-row{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:14px;}
+.field-row label{font-size:13px; font-weight:700; color:var(--ink-soft);}
+.field-row input[type=text]{
+  padding:8px 12px; border:1px solid var(--line-strong); border-radius:var(--radius-s);
+  font-size:13.5px; min-width:180px;
+}
+
+.records-list{display:flex; flex-direction:column; gap:10px;}
+.record-item{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:12px 14px; border:1px solid var(--line); border-radius:var(--radius-s);
+  background:var(--panel-2); flex-wrap:wrap;
+}
+.record-info{display:flex; flex-direction:column; gap:2px;}
+.record-info .rn{font-weight:800; font-size:14.5px;}
+.record-info .rd{font-size:12px; color:var(--muted);}
+.record-actions{display:flex; gap:8px;}
+
+.modal-backdrop{
+  position:fixed; inset:0; background:rgba(20,26,28,.45); display:none;
+  align-items:center; justify-content:center; z-index:300; padding:20px;
+}
+.modal-backdrop.show{display:flex;}
+.modal{
+  background:#fff; border-radius:var(--radius-m); padding:22px; width:100%; max-width:400px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);
+}
+.modal h3{margin:0 0 6px; font-size:16px; font-weight:900;}
+.modal p{margin:0 0 14px; font-size:13px; color:var(--ink-soft);}
+.modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:16px;}
+
+@media (max-width:640px){
+  .app-header{flex-direction:column; align-items:flex-start;}
+  .header-stats{gap:16px;}
+  table{font-size:12.5px;}
+}
+
+.loading-veil{
+  position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:10px; z-index:500; transition:opacity .3s ease;
+}
+.loading-veil .spinner{
+  width:26px; height:26px; border-radius:50%; border:3px solid var(--line-strong);
+  border-top-color:var(--amber); animation:spin .7s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ---------- New header layout ---------- */
+.app-header{
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  gap:16px;
+  padding:20px 0;
+}
+.header-brand{display:flex; align-items:center; gap:12px; justify-self:start;}
+.header-brand img{height:44px; width:auto; display:block;}
+.header-titleblock{justify-self:center; text-align:center;}
+.app-title{font-size:20px; font-weight:900; margin:0; letter-spacing:-0.01em; white-space:nowrap;}
+.app-subtitle{font-size:12px; color:var(--ink-soft); margin:2px 0 0;}
+.header-search{justify-self:end; width:100%; max-width:230px; position:relative;}
+.header-search input{
+  width:100%; padding:9px 14px 9px 34px; border:1px solid var(--line-strong);
+  border-radius:20px; font-size:13px; background:var(--panel-2); outline:none;
+  transition:border-color .15s ease, background .15s ease;
+}
+.header-search input:focus{border-color:var(--amber); background:#fff;}
+.header-search svg{position:absolute; left:11px; top:50%; transform:translateY(-50%); width:15px; height:15px; color:var(--muted); pointer-events:none;}
+.header-search-results{
+  position:absolute; top:calc(100% + 6px); left:0; width:280px; max-height:320px; overflow-y:auto;
+  background:#fff; border:1px solid var(--line); border-radius:var(--radius-s);
+  box-shadow:0 10px 26px rgba(0,0,0,.12); z-index:150; display:none;
+}
+.header-search-results.show{display:block;}
+.hsr-item{padding:9px 12px; border-bottom:1px solid var(--line); cursor:pointer; font-size:12.5px;}
+.hsr-item:last-child{border-bottom:none;}
+.hsr-item:hover{background:var(--panel-2);}
+.hsr-item .hn{font-weight:700;}
+.hsr-item .hc{color:var(--muted); font-size:11px;}
+.hsr-empty{padding:14px; text-align:center; color:var(--muted); font-size:12.5px;}
+
+.stats-strip{
+  display:flex; gap:14px; margin-bottom:18px; flex-wrap:wrap;
+}
+.stats-strip .header-stat{
+  background:var(--panel); border:1px solid var(--line); border-radius:var(--radius-s);
+  padding:10px 18px; text-align:center;
+}
+.stats-strip .num{font-size:18px; font-weight:900; color:var(--amber-dark); display:block; font-variant-numeric:tabular-nums;}
+.stats-strip .lbl{font-size:11px; color:var(--muted);}
+
+/* condition inputs */
+.cond-input{
+  width:118px; padding:6px 8px; border:1px solid var(--line-strong);
+  border-radius:var(--radius-s); font-size:12px;
+}
+.cond-input.grade-a{border-color:#BCD6E1; background:var(--grade-a-tint);}
+.cond-input.grade-a:focus{outline:none; border-color:var(--grade-a);}
+.cond-input.grade-b{border-color:#C6DCCC; background:var(--grade-b-tint);}
+.cond-input.grade-b:focus{outline:none; border-color:var(--grade-b);}
+.grade-row .cond-input{margin-inline-start:2px;}
+
+.src-badge{
+  font-size:10px; font-weight:700; padding:1px 7px; border-radius:10px;
+  background:var(--amber-tint); color:var(--amber-dark); margin-inline-start:6px;
+}
+
+/* pricing pick segmented control */
+.pick-segment{display:flex; gap:4px; background:var(--panel-2); border:1px solid var(--line); border-radius:20px; padding:3px; width:fit-content; margin-bottom:14px;}
+.pick-seg-btn{border:none; background:none; padding:7px 18px; border-radius:16px; font-size:13px; font-weight:700; color:var(--ink-soft); cursor:pointer;}
+.pick-seg-btn.active{background:#fff; color:var(--amber-dark); box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.pick-view{display:none;}
+.pick-view.active{display:block;}
+
+.select-count-pill{
+  font-size:12px; font-weight:700; color:var(--amber-dark); background:var(--amber-tint);
+  padding:4px 12px; border-radius:20px;
+}
+
+@media print{
+  .tabs, .toolbar, .header-search, .stats-strip, .app-shell > .panel:not(#sheetPanel):not(#recordViewPanel) { display:none !important; }
+  #sheetPanel .toolbar, #recordViewPanel .toolbar{display:none !important;}
+  body{background:#fff;}
+  .panel{box-shadow:none; border:none;}
+}
+
+.save-indicator{
+  font-size:12px; color:var(--muted); margin-inline-start:4px;
+}
+.save-indicator.fresh{color:var(--grade-b); font-weight:700;}
+
+.restore-banner{
+  display:flex; align-items:center; gap:8px; background:var(--grade-b-tint); color:var(--grade-b);
+  border:1px solid #C6DCCC; border-radius:var(--radius-s); padding:9px 14px; font-size:13px;
+  margin-bottom:16px; font-weight:700;
+}
+.restore-banner.hide{display:none;}
+
+.bulk-toolbar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap;
+  background:var(--amber-tint); border:1px solid #EFCBA0; border-radius:var(--radius-s);
+  padding:10px 14px; margin-bottom:12px;
+}
+.bulk-toolbar .bulk-label{font-size:12.5px; font-weight:700; color:var(--amber-dark);}
+
+.cell-edit{
+  width:100%; min-width:70px; padding:6px 8px; border:1px solid transparent;
+  border-radius:var(--radius-s); font-size:13px; background:transparent; text-align:center;
+  font-variant-numeric:tabular-nums; transition:border-color .15s ease, background .15s ease;
+}
+.cell-edit:hover{border-color:var(--line-strong); background:#fff;}
+.cell-edit:focus{outline:none; border-color:var(--amber); background:#fff;}
+.cell-edit.name-edit{text-align:right; font-weight:600;}
+.cell-edit.price-edit{font-weight:800;}
+.cell-edit.overridden{background:var(--amber-tint); border-color:var(--amber);}
+.reset-price-btn{
+  border:none; background:none; cursor:pointer; color:var(--muted); padding:2px; margin-inline-start:2px;
+  vertical-align:middle;
+}
+.reset-price-btn:hover{color:var(--amber-dark);}
+
+.sheet-title-heading{
+  text-align:center; font-size:19px; font-weight:900; padding:14px 10px 10px; color:var(--ink);
+}
+
+.sheet-title-field{margin-bottom:14px;}
+.sheet-title-field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:5px;}
+.sheet-title-field input{
+  width:100%; max-width:420px; padding:9px 14px; border:1px solid var(--line-strong);
+  border-radius:var(--radius-s); font-size:14px; font-weight:700; text-align:center;
+}
+.sheet-title-field input:focus{outline:none; border-color:var(--amber);}
+
+.scope-toggle-row{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  background:var(--panel-2); border:1px solid var(--line); border-radius:var(--radius-s);
+  padding:12px 14px; margin:14px 0;
+}
+.scope-toggle-row .stt{font-size:13px; color:var(--ink-soft); flex:1; min-width:220px;}
+.switch{position:relative; display:inline-block; width:40px; height:22px; flex-shrink:0;}
+.switch input{opacity:0; width:0; height:0;}
+.switch-slider{position:absolute; cursor:pointer; inset:0; background:var(--line-strong); border-radius:20px; transition:.15s;}
+.switch-slider:before{content:""; position:absolute; height:16px; width:16px; right:3px; top:3px; background:#fff; border-radius:50%; transition:.15s;}
+.switch input:checked + .switch-slider{background:var(--amber);}
+.switch input:checked + .switch-slider:before{transform:translateX(-18px);}
+
+/* dynamic classification list per item */
+.class-list{display:flex; flex-direction:column; gap:6px;}
+.class-row{display:flex; align-items:center; gap:4px;}
+.class-label-input{
+  width:56px; padding:6px 6px; border:1px solid var(--line-strong); border-radius:var(--radius-s);
+  font-size:12px; text-align:center; font-weight:700; background:var(--amber-tint); color:var(--amber-dark);
+}
+.class-label-input:focus{outline:none; border-color:var(--amber);}
+.class-row .pct-input{width:62px;}
+.class-row .cond-input{width:150px;}
+.remove-class-btn{
+  border:none; background:none; cursor:pointer; color:var(--muted); font-size:16px; line-height:1;
+  padding:2px 4px; flex-shrink:0;
+}
+.remove-class-btn:hover{color:var(--danger);}
+.add-class-btn{
+  border:1px dashed var(--line-strong); background:transparent; color:var(--ink-soft);
+  padding:6px 12px; border-radius:var(--radius-s); font-size:12.5px; font-weight:700; cursor:pointer;
+  align-self:flex-start; transition:border-color .15s ease, color .15s ease;
+}
+.add-class-btn:hover{border-color:var(--amber); color:var(--amber-dark);}
+
+.remove-row-btn{
+  border:none; background:none; cursor:pointer; color:var(--muted); font-size:17px; line-height:1;
+}
+.remove-row-btn:hover{color:var(--danger);}
+</style>
+</head>
+<body>
+
+<div class="loading-veil" id="loadingVeil">
+  <div class="spinner"></div>
+  <div style="font-size:13px; color:var(--ink-soft);">جارِ تحميل البيانات المحفوظة…</div>
+</div>
+
+<div class="app-shell">
+  <header class="app-header">
+    <div class="header-brand">
+      <img src="data:image/png;base64,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" alt="الأمل الشريف للبلاستيك">
+    </div>
+    <div class="header-titleblock">
+      <h1 class="app-title">برنامج تسعير المجروشات</h1>
+      <p class="app-subtitle">تصنيف الأصناف، أسعار الخامات المرجعية، وإصدار كشوف التسعير الشهرية</p>
+    </div>
+    <div class="header-search">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M20 20L16.5 16.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input type="text" id="globalSearch" placeholder="ابحث عن صنف أو خامة…" autocomplete="off">
+      <div class="header-search-results" id="globalSearchResults"></div>
+    </div>
+  </header>
+
+  <div class="stats-strip">
+    <div class="header-stat"><span class="num" id="statItems">–</span><span class="lbl">صنف</span></div>
+    <div class="header-stat"><span class="num" id="statMaterials">–</span><span class="lbl">خامة مرجعية</span></div>
+    <div class="header-stat"><span class="num" id="statRecords">–</span><span class="lbl">سجل شهري</span></div>
+    <div style="flex:1;"></div>
+    <button class="btn btn-sm btn-ghost" id="btnBackupExport" title="حفظ نسخة من كل البيانات كملف على جهازك">⬇ نسخة احتياطية</button>
+    <button class="btn btn-sm btn-ghost" id="btnBackupImport" title="استرجاع البيانات من ملف نسخة احتياطية">⬆ استيراد نسخة</button>
+    <input type="file" id="backupFileInput" accept="application/json" style="display:none;">
+  </div>
+
+  <div class="restore-banner hide" id="restoreBanner"></div>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="items">الأصناف والتصنيف</button>
+    <button class="tab-btn" data-tab="materials">الخامات المرجعية</button>
+    <button class="tab-btn" data-tab="pricing">التسعير والتصدير</button>
+    <button class="tab-btn" data-tab="records">السجل الشهري</button>
+  </nav>
+
+  <!-- ITEMS TAB -->
+  <section class="view active" id="view-items">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">أصناف المجروشات</h2>
+          <p class="panel-desc">كل صنف يظهر باسمه وكوده والخامة المرجعية بتاعته بدون أي تصنيف افتراضي. لو عايز تسعّر صنف بأكتر من فئة (نظيف، به شوائب، ...) دوس "+ إضافة تصنيف" جنبه وأضف كل فئة بنسبتها ووصفها، وتقدر تحذف أي فئة بعلامة (×) في أي وقت.</p>
+        </div>
+        <div class="toolbar">
+          <div class="search-box">
+            <input type="text" id="itemsSearch" placeholder="ابحث بالاسم أو الكود…">
+          </div>
+          <button class="btn" id="btnAddItem">+ إضافة صنف</button>
+          <button class="btn btn-danger" id="btnClearAllClassification">🧹 مسح كل التصنيفات</button>
+          <button class="btn btn-primary" id="btnSaveItems">حفظ التصنيف</button>
+          <span class="save-indicator" id="itemsLastSaved"></span>
+        </div>
+      </div>
+
+      <div class="bulk-toolbar" id="itemsBulkToolbar" style="display:none;">
+        <span class="select-count-pill" id="itemsSelectCountPill">0 محدد</span>
+        <span class="bulk-label">إضافة تصنيف على المحدد:</span>
+        <input type="text" class="cond-input" id="bulkLabel" placeholder="اسم الفئة (أ)" style="width:90px;">
+        <input type="number" step="0.1" min="0" max="100" class="pct-input" id="bulkPct" placeholder="%">
+        <input type="text" class="cond-input" id="bulkCond" placeholder="وصف الحالة">
+        <button class="btn btn-sm btn-primary" id="btnApplyBulk">تطبيق</button>
+        <button class="btn btn-sm btn-danger" id="btnDeleteBulk">حذف المحدد</button>
+        <button class="btn btn-sm btn-ghost" id="btnClearItemsBulkSelect">إلغاء التحديد</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="itemsTable">
+          <thead>
+            <tr>
+              <th style="width:30px;"><input type="checkbox" class="row-check" id="itemsSelectAllBox"></th>
+              <th style="width:110px;">كود الصنف</th>
+              <th>اسم الصنف</th>
+              <th style="width:190px;">الخامة المرجعية</th>
+              <th style="width:320px;">التصنيفات (اختياري)</th>
+              <th style="width:36px;"></th>
+            </tr>
+          </thead>
+          <tbody id="itemsBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-note" id="itemsEmpty" style="display:none;">لا توجد أصناف مطابقة للبحث</div>
+    </div>
+  </section>
+
+  <!-- MATERIALS TAB -->
+  <section class="view" id="view-materials">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">الخامات المرجعية</h2>
+          <p class="panel-desc">أدخل السعر الحالي لكل خامة مرجعية. هذا السعر هو الأساس الذي تُحسب منه أسعار فئتَي (أ) و(ب).</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn" id="btnAddMaterial">+ إضافة خامة</button>
+          <button class="btn btn-primary" id="btnSaveMaterials">حفظ الأسعار</button>
+          <span class="save-indicator" id="materialsLastSaved"></span>
+        </div>
+      </div>
+
+      <div class="bulk-toolbar" id="materialsBulkToolbar" style="display:none;">
+        <span class="select-count-pill" id="materialsSelectCountPill">0 محدد</span>
+        <button class="btn btn-sm btn-danger" id="btnDeleteBulkMat">حذف المحدد</button>
+        <button class="btn btn-sm btn-ghost" id="btnClearMaterialsBulkSelect">إلغاء التحديد</button>
+      </div>
+
+      <div class="table-wrap">
+        <table id="materialsTable">
+          <thead>
+            <tr>
+              <th style="width:30px;"><input type="checkbox" class="row-check" id="materialsSelectAllBox"></th>
+              <th style="width:150px;">كود الخامة</th>
+              <th>اسم الخامة</th>
+              <th style="width:160px;">السعر المرجعي</th>
+              <th style="width:36px;"></th>
+            </tr>
+          </thead>
+          <tbody id="materialsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING TAB -->
+  <section class="view" id="view-pricing">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">اختيار الأصناف لإصدار كشف تسعير</h2>
+          <p class="panel-desc">اختر من المجروشات أو من الخامات المرجعية مباشرة — يمكن تحديد عدة أصناف من الاثنين معًا، ثم اضغط "إنشاء الكشف".</p>
+        </div>
+        <span class="select-count-pill" id="selectCountPill">0 محدد</span>
+      </div>
+
+      <div class="pick-segment">
+        <button class="pick-seg-btn active" data-pick="crushed">المجروشات</button>
+        <button class="pick-seg-btn" data-pick="materials">الخامات المرجعية</button>
+      </div>
+
+      <div class="pick-view active" id="pickview-crushed">
+        <div class="toolbar" style="margin-bottom:10px;">
+          <div class="search-box">
+            <input type="text" id="pricingSearch" placeholder="ابحث بالاسم أو الكود…">
+          </div>
+          <button class="btn btn-sm" id="btnSelectAll">تحديد كل الظاهر</button>
+          <button class="btn btn-sm" id="btnClearSelect">إلغاء تحديد المجروشات</button>
+        </div>
+        <div class="table-wrap" style="max-height:320px; overflow-y:auto;">
+          <table id="pickTable">
+            <thead>
+              <tr>
+                <th style="width:34px;"></th>
+                <th style="width:110px;">الكود</th>
+                <th>اسم الصنف</th>
+                <th style="width:170px;">الخامة المرجعية</th>
+              </tr>
+            </thead>
+            <tbody id="pickBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="pick-view" id="pickview-materials">
+        <div class="toolbar" style="margin-bottom:10px;">
+          <button class="btn btn-sm" id="btnSelectAllMat">تحديد كل الخامات</button>
+          <button class="btn btn-sm" id="btnClearSelectMat">إلغاء تحديد الخامات</button>
+        </div>
+        <div class="table-wrap" style="max-height:320px; overflow-y:auto;">
+          <table id="pickMatTable">
+            <thead>
+              <tr>
+                <th style="width:34px;"></th>
+                <th style="width:150px;">الكود</th>
+                <th>اسم الخامة</th>
+                <th style="width:130px;">السعر الحالي</th>
+              </tr>
+            </thead>
+            <tbody id="pickMatBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div style="margin-top:14px; display:flex; justify-content:flex-end;">
+        <button class="btn btn-primary" id="btnBuildSheet">إنشاء الكشف ↑</button>
+      </div>
+    </div>
+
+    <div class="panel" id="sheetPanel" style="display:none;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">كشف التسعير</h2>
+          <p class="panel-desc" id="sheetMeta"></p>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-sm" id="btnPrintSheet">طباعة</button>
+          <button class="btn btn-sm" id="btnExportExcel">تصدير Excel</button>
+          <button class="btn btn-sm" id="btnExportImage">تصدير صورة</button>
+          <button class="btn btn-sm btn-primary" id="btnSaveRecord">حفظ كسجل شهري</button>
+        </div>
+      </div>
+
+      <div class="sheet-title-field">
+        <label>عنوان الكشف (يظهر في أعلى الصورة وملف Excel)</label>
+        <input type="text" id="sheetTitleInput" placeholder="تسعير مجروشات عن شهر …">
+      </div>
+
+      <div class="summary-strip" id="sheetSummary"></div>
+
+      <p class="panel-desc" style="margin-bottom:10px;">يمكنك التعديل مباشرة في أي خانة بالجدول (الاسم، وصف الحالة، النسبة، السعر المرجعي، السعر).</p>
+
+      <div class="table-wrap" id="sheetCapture">
+        <div class="sheet-title-heading" id="sheetTitleHeading"></div>
+        <table id="sheetTable">
+          <thead>
+            <tr>
+              <th>الصنف</th>
+              <th style="width:60px;">الفئة</th>
+              <th>وصف الحالة</th>
+              <th style="width:70px;">النسبة</th>
+              <th>الصنف المرجعي</th>
+              <th style="width:110px;">الكود المرجعي</th>
+              <th>السعر المرجعي (ج.م)</th>
+              <th>السعر (ج.م/طن)</th>
+              <th style="width:32px;"></th>
+            </tr>
+          </thead>
+          <tbody id="sheetBody"></tbody>
+        </table>
+      </div>
+
+      <div class="scope-toggle-row">
+        <span class="stt">هل تريد أن تُطبَّق التعديلات اللي عملتها في الجدول على بيانات الأصناف والخامات الأصلية في الملف؟ لو الخيار متوقف، هتفضل التعديلات في هذا الكشف فقط (والسجل الشهري لو حفظته) من غير ما تغيّر بيانات التصنيف أو الأسعار الأساسية.</span>
+        <label class="switch">
+          <input type="checkbox" id="applyToMasterToggle">
+          <span class="switch-slider"></span>
+        </label>
+        <button class="btn btn-sm" id="btnApplySheetEdits">تطبيق التعديلات</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RECORDS TAB -->
+  <section class="view" id="view-records">
+    <div class="panel">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title">السجل الشهري</h2>
+          <p class="panel-desc">كل كشف تسعير تحفظه من تبويب "التسعير والتصدير" يظهر هنا مرتبًا بتاريخ الحفظ.</p>
+        </div>
+      </div>
+      <div class="records-list" id="recordsList"></div>
+      <div class="empty-note" id="recordsEmpty" style="display:none;">لا توجد سجلات محفوظة بعد</div>
+    </div>
+
+    <div class="panel" id="recordViewPanel" style="display:none;">
+      <div class="panel-head">
+        <div>
+          <h2 class="panel-title" id="recordViewTitle">عرض السجل</h2>
+          <p class="panel-desc" id="recordViewMeta"></p>
+        </div>
+        <div class="toolbar">
+          <button class="btn btn-sm" id="btnPrintRecord">طباعة</button>
+          <button class="btn btn-sm" id="btnExportRecordExcel">تصدير Excel</button>
+          <button class="btn btn-sm" id="btnExportRecordImage">تصدير صورة</button>
+          <button class="btn btn-sm btn-ghost" id="btnCloseRecordView">إغلاق</button>
+        </div>
+      </div>
+      <div class="table-wrap" id="recordCapture">
+        <div class="sheet-title-heading" id="recordTitleHeading"></div>
+        <table id="recordViewTable">
+          <thead>
+            <tr>
+              <th>الصنف</th>
+              <th style="width:60px;">الفئة</th>
+              <th>وصف الحالة</th>
+              <th style="width:70px;">النسبة</th>
+              <th>الصنف المرجعي</th>
+              <th style="width:110px;">الكود المرجعي</th>
+              <th>السعر المرجعي (ج.م)</th>
+              <th>السعر (ج.م/طن)</th>
+            </tr>
+          </thead>
+          <tbody id="recordViewBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-backdrop" id="confirmModal">
+  <div class="modal">
+    <h3 id="confirmTitle">تأكيد الحذف</h3>
+    <p id="confirmText">هل أنت متأكد من إتمام هذا الإجراء؟</p>
+    <div class="modal-actions">
+      <button class="btn" id="confirmCancel">تراجع</button>
+      <button class="btn btn-danger" id="confirmOk">تأكيد</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="recordModal">
+  <div class="modal">
+    <h3>حفظ كسجل شهري</h3>
+    <p>سيتم حفظ الكشف الحالي بهذا الاسم في السجل الشهري.</p>
+    <div class="field-row" style="margin-bottom:0;">
+      <input type="text" id="recordLabelInput" style="width:100%;" placeholder="مثال: تسعير سبتمبر 2026">
+    </div>
+    <div class="modal-actions">
+      <button class="btn" id="recordModalCancel">تراجع</button>
+      <button class="btn btn-primary" id="recordModalOk">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<script id="seed-data" type="application/json">{"items": [{"code": "PL0001", "name": "مجروش مواسير رمادي وبرتقال", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0002", "name": "مجروش مواسير أسود (غامق)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0003", "name": "مجروش مواسير حشو", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0004", "name": "مجروش مواسير لون CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0005", "name": "مجروش PE ملون", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0006", "name": "مجروش PE أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0007", "name": "مجروش PPR خط أصفر", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0008", "name": "مجروش PPR خط أزرق", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0009", "name": "مجروش PPR حشو أحمر", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0010", "name": "مجروش PPR معزول أسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0011", "name": "مجروش PPH رمادي خفيف", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0012", "name": "مجروش PPH رمادي ثقيل", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0013", "name": "مجروش CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0014", "name": "مجروش وصلات PP اسود", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0015", "name": "مجروش وصلات PP ملون", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0016", "name": "مجروش بولي اسيتال", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0017", "name": "مجروش بولي اميد", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0018", "name": "مجروش TPE أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0019", "name": "مجروش وصلات PVC أبيض", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0020", "name": "مجروش أبيض طري", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0021", "name": "مجروش وصلات PVC رمادي", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0022", "name": "مجروش وصلات PVC أسود", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0023", "name": "مجروش فيلم", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0024", "name": "كنسة رزن", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0025", "name": "كنسة بودرة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0026", "name": "كنسة أوميا", "rcode": "RFI100001", "rname": "CaCO3 10 micron", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0027", "name": "حبيبات وصلات PVC أبيض", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0028", "name": "حبيبات وصلات PVC غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0029", "name": "كنسة حبيبات PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0030", "name": "كنسة حبيبات PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0031", "name": "كنسة حبيبات PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0032", "name": "كنسة مجروش", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0033", "name": "كنسة مجروش PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0034", "name": "كنسة حبيبات مخلطة", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0035", "name": "كنسة كسارة وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0036", "name": "كنسة كسارة مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0037", "name": "بودرة بيارة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0038", "name": "هايش منشار مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0039", "name": "هايش مخارط وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0040", "name": "كتل PVC وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0041", "name": "كتل PPR أخضر", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0042", "name": "كتل PPR ملونة", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0043", "name": "كتل PVC مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0044", "name": "كتل PE مواسير ملونة", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0045", "name": "كتل PE مواسير أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0046", "name": "كتل تنظيف مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0047", "name": "كتل PVC محروقة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0048", "name": "كتل PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0049", "name": "كتل CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0050", "name": "زوائد كاوتش", "rcode": "RRU100001", "rname": "NR", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0051", "name": "كتل كاوتش", "rcode": "RRU100001", "rname": "NR", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0052", "name": "طبالي بلاستيك", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "WFS000206", "name": "مجروش ابيض طرى PVC", "rcode": "RPV100003", "rname": "S-PVC 70", "src": "master", "classifications": []}, {"code": "WFS000212", "name": "مجروش وصلات PP - غامق 1753", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000220", "name": "مجروش PPR اخضر", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000223", "name": "مجروش وصلات احمر PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000224", "name": "مجروش وصلات اسود ضغط", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000231", "name": "مجروش وصلات ساخنC.P.V.C معالج", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000233", "name": "مجروش وصلات P.E أسود 100", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000202", "name": "مجروش وصلات ازرق PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000209", "name": "مجروش وصلات P.E أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000218", "name": "مجروش ابيض( أ)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000240", "name": "مجروش أحمر وصلات P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000203", "name": "مجروش وصلات اخضر PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000205", "name": "مجروش وصلات رمادى", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000234", "name": "مجروش وصلات P.E أصفر 80", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000237", "name": "مجروش وصلات ازرق PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000238", "name": "مجروش وصلات PPH برتقالي", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFS000241", "name": "زوائد وتحت التكسير ابيض تشغيل خارجي", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000201", "name": "مجروش وصلات حلقة صفراء TPE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000216", "name": "مجروش اسود PP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000227", "name": "مجروش P.P.R أبيض", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000228", "name": "مجروش وصلات P.P.R HOFFEN", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000230", "name": "مجروش وصلات حلقة صفراء TPE 20%", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000232", "name": "مجروش PA بولى امايد رمادي", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000301", "name": "مجروش فيلم LD - PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000207", "name": "مجروش اسود طرى PVC", "rcode": "RPV100003", "rname": "S-PVC 70", "src": "master", "classifications": []}, {"code": "WFS000208", "name": "مجروش وصلات اسود TPE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000213", "name": "مجروش وصلات PPH - فاتح 1755", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFS000217", "name": "مجروش وصلات PP-R - OD", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000225", "name": "مجروش وصلات PP اسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000229", "name": "مجروش وصلات APS", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000239", "name": "مجروش رمادي وصلات P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000215", "name": "مجروش حشو وصلاتPP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000222", "name": "مجروش بولى اسيتال ازرق", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000204", "name": "مجروش وصلات مخلط PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000210", "name": "مجروش ابيض وصلات P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000211", "name": "مجروش P.E مكسر", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000214", "name": "مجروش وصلات رمادى ساخنC.P.V.C", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000219", "name": "مجروش حلقة حمراء", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000221", "name": "مجروش وصلات ابيض PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000226", "name": "مجروش PA بولى امايد", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000128", "name": "مجروش حشو مصبوغ ازرق", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000130", "name": "مجروش رمادى مصبوغ ازرق", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000137", "name": "مجروش مواسير رمادي بارد", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000141", "name": "مجروش PPR خط ازرق", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000142", "name": "مجروش PPR خط احمر", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000111", "name": "مجروش مصبوغ فاتح حشو", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000113", "name": "مجروش مواسير مطحون برتقالي حشو", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000117", "name": "مجروش PPRاسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000118", "name": "مجروش حشو احمر PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000135", "name": "مجروش مواسير CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000149", "name": "مجروش اسود PE (ب)", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000128", "name": "هايش ( مخارط ) منشار وصلات", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000143", "name": "كتل PP-H", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000146", "name": "كتل فيلم", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000151", "name": "مادة لاصقة تالفة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000158", "name": "كنسه كساره مواسير (ا)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000168", "name": "مجروش اسود مخرز PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000173", "name": "مطحون رمادي مصبوغ ازرق غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000174", "name": "مطحون مخلط مصبوغ ازرق غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000181", "name": "هايش منشار PE إسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000190", "name": "خامة جنراتو محون تالف", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000196", "name": "مجروش وصلات رمادي ضغط غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000203", "name": "كتل مواسير ألوان ب", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000114", "name": "كنسة ريزن", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000116", "name": "كتل مواسير بيضاء", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000129", "name": "كنسة بودرة وصلات ملوث", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000130", "name": "كنسة حبيبات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000145", "name": "حبيبات وصلات ابيض غير صالحة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000149", "name": "كتل برتقالى مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000159", "name": "كنسه كساره مواسير (ب)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000172", "name": "كنسة اوميا", "rcode": "RFI100002", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000177", "name": "مطحون ابيض مصبوغ ازرق غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000184", "name": "كتل هوفن PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000188", "name": "كنسه ريزن (ا)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000211", "name": "ماسترباتش أحمر P V C غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000213", "name": "بودره تيفلون 807 ( وصلات ) غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000217", "name": "مجروش رمادي وصلات (ب)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000220", "name": "مجروش PE برتقالي د/ث", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000131", "name": "هبو مجروش", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000132", "name": "كتل تنظيف وصلات", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000140", "name": "كتل مواسير PP-R ( أ )", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000153", "name": "حبيبات وصلات بداية تشغيل ج", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000157", "name": "هايش PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000161", "name": "كنسه كساره وصلات (ا)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000175", "name": "مجروش PPR ( ب ) غ صالح", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000176", "name": "مجروش PPR ( ج ) غ صالح", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000191", "name": "هايش متنوع", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000202", "name": "كنسة هايش PPH غير صالح", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000101", "name": "ناعم ناتج فلاتر", "rcode": "RFI100001", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000102", "name": "مجروش وصلات ابيض(ج)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000113", "name": "كتل رمادى مواسير", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000119", "name": "كتل ازرق P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000122", "name": "كتل مواسير CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000124", "name": "زوائد كاوتش NR ( أ )", "rcode": "RRU100001", "rname": "NR", "src": "master", "classifications": []}, {"code": "WFM000125", "name": "كتل تنظيف وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000126", "name": "كتل وصلات بيضاء", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000133", "name": "كتل وصلات رمادى محروقة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000137", "name": "مجروش رمادى C0P0V0C", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000142", "name": "كتل PP-R اسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000156", "name": "مجروش PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000183", "name": "هايش مجروش وصلات CPVC ساخن", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000185", "name": "كتل هوفن معزول PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000198", "name": "زوائد هالك متنوع وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000199", "name": "حبيبات مخلطة P.E غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000212", "name": "حبيبات اينو فيبرCS1- 8820-GF غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000218", "name": "مجروش تنظيف غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000221", "name": "كنسة مجروش PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000104", "name": "حبيبات وصلات بداية التشغيل", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000110", "name": "كنسة بودرة ملوثة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000117", "name": "مواسير محروقة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000120", "name": "كنسه حبيبات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000134", "name": "حبيبات وصلات زرقاء غير صالحة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000136", "name": "كتل رمادى وصلات CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000141", "name": "كنسة مجروش PP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000147", "name": "ناعم ناتج الفلتر ( اوميا )", "rcode": "RFI100002", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000155", "name": "كتل مواسير ابيض ب", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000169", "name": "مجروش برتقالى (ب)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000171", "name": "مجروش وصلات ابيض ( ب )", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000178", "name": "مطحون برتقالى مصبوغ غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000179", "name": "مطحون رمادي غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000193", "name": "مجروش مواسير ابيض غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000201", "name": "هايش منشار مخلط PVC/ PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000207", "name": "ماسترباتش اسود غيرصالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000209", "name": "PPH حبيبات بداية تشغيل غير صالح", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000224", "name": "مجروش وصلات P.E غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000103", "name": "كنسة مجروش كسارات الوصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000135", "name": "زوائد وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000148", "name": "كتل الون PE مواسير", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000194", "name": "مجروش وصلات P.E أصفر 80 غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000197", "name": "تيتانيوم غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000210", "name": "صبغة وصلات كريمى5411 غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000215", "name": "ماستر باتش ابيض طري غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000219", "name": "مجروش رمادي وصلات د/ث", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000106", "name": "كنسة زبالة الكسارة { أ }", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000109", "name": "مجروش مطحون ابيض غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000111", "name": "هايش منشار { أ }", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000112", "name": "ناعم ناتج اوميا", "rcode": "RFI100002", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000115", "name": "كنسة بودرة ملوثة (2 )", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000118", "name": "كتل غامق", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000138", "name": "كتل PP - R وصلات", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000150", "name": "كتل وصلات CPVC ( ج )", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000154", "name": "كتل مواسير رمادى ب", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000162", "name": "كنسه كساره وصلات (ب)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFm000163", "name": "كتل محروق مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFm000164", "name": "كتل PE غاز اصفر", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000170", "name": "كتل حشو احمر فيبر PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000180", "name": "كتل غاز برتقالى PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000182", "name": "مجروش وصلات ابيض (ا)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000189", "name": "خامة كربون تالفة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000204", "name": "كتل محروقة وصلات متنوعة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000105", "name": "مجروش PPH ( ج )", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000107", "name": "كنسة بيارة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000108", "name": "كتل تنظيف مواسير ( أ )", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000121", "name": "كتل اسود PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000123", "name": "عجينة كتل كاوتش (أ)", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000127", "name": "كتل وصلات رمادى", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000139", "name": "كنسة خامة PP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000144", "name": "جردل بلاستيك هالك", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000152", "name": "كتل وصلات بيضاء ج", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000160", "name": "كتل مواسير ppr (ب)", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000195", "name": "كتل مخلطه ألوان وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000200", "name": "مجروش رمادي PVC غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000205", "name": "سودPE كنسة مجروش", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000214", "name": "حبيبات PPR C TF 60 غير صالح", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000216", "name": "مجروش وصلات أبيض (ب)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000222", "name": "بلاستيك متنوع", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000223", "name": "مجرى + صليبة PE مخلفات", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}], "materials": [{"code": "RPV100003", "name": "S-PVC 70", "price": ""}, {"code": "RPR100001", "name": "PPR-N", "price": 72960}, {"code": "RPV100002", "name": "S-PVC 57", "price": 52440}, {"code": "RPE100005", "name": "black PE 100", "price": 64980}, {"code": "RPR100004", "name": "PPB-N-Low melt", "price": 84360}, {"code": "RPV100001", "name": "S-PVC 67", "price": 46500.6}, {"code": "RFI100002", "name": "CaCO3 10 micron", "price": ""}, {"code": "RFI100001", "name": "CaCO3 10 micron", "price": 2679}, {"code": "RRU100001", "name": "NR", "price": 136800}]}</script>
+<script>
+(function(){
+"use strict";
+
+/* ---------------- Storage helpers ---------------- */
+const HAS_ARTIFACT_STORAGE = (typeof window.storage !== 'undefined' && window.storage !== null);
+
+async function storeGet(key){
+  if(HAS_ARTIFACT_STORAGE){
+    try{
+      const r = await window.storage.get(key, false);
+      return r ? JSON.parse(r.value) : null;
+    }catch(e){ return null; }
+  }
+  try{
+    const v = localStorage.getItem('mgr_'+key);
+    return v ? JSON.parse(v) : null;
+  }catch(e){ return null; }
+}
+async function storeSet(key, value){
+  if(HAS_ARTIFACT_STORAGE){
+    try{
+      await window.storage.set(key, JSON.stringify(value), false);
+      return true;
+    }catch(e){ console.error('storage set failed', key, e); return false; }
+  }
+  try{
+    localStorage.setItem('mgr_'+key, JSON.stringify(value));
+    return true;
+  }catch(e){ console.error('localStorage set failed', key, e); return false; }
+}
+
+const KEYS = { items:'items_v3', materials:'materials_v2', records:'records_v2', meta:'meta_v2' };
+
+let STATE = { items: [], materials: [], records: [] };
+let META = { itemsSavedAt: null, materialsSavedAt: null };
+
+/* ---------------- Boot ---------------- */
+const seedEl = document.getElementById('seed-data');
+const SEED = JSON.parse(seedEl.textContent);
+
+async function boot(){
+  const [items, materials, records, meta] = await Promise.all([
+    storeGet(KEYS.items),
+    storeGet(KEYS.materials),
+    storeGet(KEYS.records),
+    storeGet(KEYS.meta)
+  ]);
+
+  const restoredFromSave = !!(items || materials);
+
+  STATE.items = items || SEED.items.map(it => ({...it}));
+  STATE.materials = materials || SEED.materials.map(m => ({...m}));
+  STATE.records = records || [];
+  META = meta || META;
+
+  if(!items) await storeSet(KEYS.items, STATE.items);
+  if(!materials) await storeSet(KEYS.materials, STATE.materials);
+  if(!records) await storeSet(KEYS.records, STATE.records);
+
+  renderAll();
+  updateSaveIndicators();
+
+  if(restoredFromSave){
+    const banner = document.getElementById('restoreBanner');
+    banner.textContent = '✓ تم استرجاع آخر نسخة محفوظة من بياناتك تلقائيًا — كل التعديلات اللي حفظتها موجودة.';
+    banner.classList.remove('hide');
+    setTimeout(()=> banner.classList.add('hide'), 6000);
+  }
+
+  const veil = document.getElementById('loadingVeil');
+  veil.style.opacity = '0';
+  setTimeout(()=> veil.remove(), 320);
+}
+
+function updateSaveIndicators(){
+  const fmt = (iso)=>{
+    if(!iso) return '';
+    const d = new Date(iso);
+    return 'آخر حفظ: ' + d.toLocaleDateString('ar-EG') + ' — ' + d.toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'});
+  };
+  document.getElementById('itemsLastSaved').textContent = fmt(META.itemsSavedAt);
+  document.getElementById('materialsLastSaved').textContent = fmt(META.materialsSavedAt);
+}
+function flashSaved(elId){
+  const el = document.getElementById(elId);
+  el.classList.add('fresh');
+  setTimeout(()=> el.classList.remove('fresh'), 1500);
+}
+
+/* ---------------- Utilities ---------------- */
+function toast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(()=> t.classList.remove('show'), 2200);
+}
+
+function fmtNum(n){
+  if(n === '' || n === null || n === undefined || isNaN(n)) return '—';
+  return Number(n).toLocaleString('ar-EG', {maximumFractionDigits:2});
+}
+function fmtMoney(n){
+  if(n === '' || n === null || n === undefined || isNaN(n)) return '—';
+  return Number(n).toLocaleString('ar-EG', {maximumFractionDigits:2}) + ' ج.م';
+}
+
+function materialByCode(code){
+  return STATE.materials.find(m => m.code === code);
+}
+
+function escapeHtml(s){
+  return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function updateHeaderStats(){
+  document.getElementById('statItems').textContent = STATE.items.length;
+  document.getElementById('statMaterials').textContent = STATE.materials.length;
+  document.getElementById('statRecords').textContent = STATE.records.length;
+}
+
+/* ---------------- Tabs ---------------- */
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.tab).classList.add('active');
+  });
+});
+function switchTab(tab){
+  document.querySelector(`.tab-btn[data-tab="${tab}"]`).click();
+}
+
+/* ---------------- Items tab: dynamic classifications ---------------- */
+let BULK_SELECTED = new Set(); // item codes selected for bulk actions in items tab
+const CLASS_LABELS = ['أ','ب','ج','د','هـ','و','ز','ح','ط','ي'];
+
+function newClassId(){
+  return 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,7);
+}
+function nextClassLabel(it){
+  const n = (it.classifications || []).length;
+  return CLASS_LABELS[n] || String(n+1);
+}
+
+function updateItemsBulkToolbar(){
+  const toolbar = document.getElementById('itemsBulkToolbar');
+  const pill = document.getElementById('itemsSelectCountPill');
+  if(BULK_SELECTED.size > 0){
+    toolbar.style.display = 'flex';
+    pill.textContent = `${BULK_SELECTED.size} محدد`;
+  } else {
+    toolbar.style.display = 'none';
+  }
+}
+
+function renderItems(filter){
+  const body = document.getElementById('itemsBody');
+  const q = (filter||'').trim().toLowerCase();
+  body.innerHTML = '';
+  let shown = 0;
+  STATE.items.forEach((it)=>{
+    if(!it.classifications) it.classifications = [];
+    if(q && !(it.name.toLowerCase().includes(q) || it.code.toLowerCase().includes(q))) return;
+    shown++;
+    const mat = materialByCode(it.rcode);
+    const matLabel = mat ? `<div class="mat-tag"><span class="mn">${escapeHtml(mat.name)}</span><span class="mc">${escapeHtml(mat.code)}</span></div>` : `<span class="mat-tag mc">غير محددة</span>`;
+    const srcBadge = it.src === 'bulletin_2024_10' ? '<span class="src-badge">بيان أكتوبر 2024</span>' : '';
+
+    const classRows = it.classifications.map(cl => `
+      <div class="class-row" data-code="${escapeHtml(it.code)}" data-classid="${escapeHtml(cl.id)}">
+        <input type="text" class="class-label-input" data-field="label" value="${escapeHtml(cl.label ?? '')}" placeholder="فئة">
+        <input type="number" step="0.1" min="0" max="100" class="pct-input" data-field="pct" value="${cl.pct ?? ''}" placeholder="%">
+        <input type="text" class="cond-input" data-field="cond" value="${escapeHtml(cl.cond ?? '')}" placeholder="وصف الحالة">
+        <button class="remove-class-btn" data-remove-class title="حذف هذه الفئة">×</button>
+      </div>
+    `).join('');
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" class="row-check bulk-check" data-code="${escapeHtml(it.code)}" ${BULK_SELECTED.has(it.code) ? 'checked':''}></td>
+      <td class="code-cell">${escapeHtml(it.code)}</td>
+      <td>${escapeHtml(it.name)}${srcBadge}</td>
+      <td>${matLabel}</td>
+      <td>
+        <div class="class-list" data-code="${escapeHtml(it.code)}">
+          ${classRows}
+          <button class="add-class-btn" data-addclass="${escapeHtml(it.code)}">+ إضافة تصنيف</button>
+        </div>
+      </td>
+      <td><button class="icon-btn" data-del="${escapeHtml(it.code)}" title="حذف الصنف">${trashIcon()}</button></td>
+    `;
+    body.appendChild(tr);
+  });
+  document.getElementById('itemsEmpty').style.display = shown ? 'none' : 'block';
+
+  body.querySelectorAll('.class-row').forEach(rowEl=>{
+    const code = rowEl.dataset.code, classId = rowEl.dataset.classid;
+    rowEl.querySelectorAll('input[data-field]').forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        const it = STATE.items.find(i=>i.code === code);
+        if(!it) return;
+        const cl = it.classifications.find(c=>c.id === classId);
+        if(!cl) return;
+        cl[inp.dataset.field] = inp.value;
+      });
+    });
+    rowEl.querySelector('[data-remove-class]').addEventListener('click', ()=>{
+      const it = STATE.items.find(i=>i.code === code);
+      if(!it) return;
+      it.classifications = it.classifications.filter(c=>c.id !== classId);
+      renderItems(document.getElementById('itemsSearch').value);
+    });
+  });
+  body.querySelectorAll('[data-addclass]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const it = STATE.items.find(i=>i.code === btn.dataset.addclass);
+      if(!it) return;
+      if(!it.classifications) it.classifications = [];
+      it.classifications.push({ id:newClassId(), label: nextClassLabel(it), pct:'', cond:'' });
+      renderItems(document.getElementById('itemsSearch').value);
+    });
+  });
+  body.querySelectorAll('.bulk-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) BULK_SELECTED.add(cb.dataset.code);
+      else BULK_SELECTED.delete(cb.dataset.code);
+      updateItemsBulkToolbar();
+    });
+  });
+  body.querySelectorAll('[data-del]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const it = STATE.items.find(i=>i.code === b.dataset.del);
+      if(!it) return;
+      confirmAction(
+        'حذف الصنف',
+        `سيتم حذف "${it.name}" نهائيًا من القائمة.`,
+        async ()=>{
+          STATE.items = STATE.items.filter(i=>i.code !== it.code);
+          await storeSet(KEYS.items, STATE.items);
+          renderAll();
+          toast('تم حذف الصنف');
+        }
+      );
+    });
+  });
+}
+
+document.getElementById('itemsSelectAllBox').addEventListener('change', (e)=>{
+  const visible = getVisibleItems(document.getElementById('itemsSearch').value);
+  if(e.target.checked) visible.forEach(it=> BULK_SELECTED.add(it.code));
+  else visible.forEach(it=> BULK_SELECTED.delete(it.code));
+  renderItems(document.getElementById('itemsSearch').value);
+  updateItemsBulkToolbar();
+});
+document.getElementById('btnClearItemsBulkSelect').addEventListener('click', ()=>{
+  BULK_SELECTED.clear();
+  renderItems(document.getElementById('itemsSearch').value);
+  updateItemsBulkToolbar();
+});
+document.getElementById('btnDeleteBulk').addEventListener('click', ()=>{
+  if(BULK_SELECTED.size === 0) return;
+  const n = BULK_SELECTED.size;
+  confirmAction(
+    'حذف الأصناف المحددة',
+    `سيتم حذف ${n} صنف نهائيًا من القائمة. هذا الإجراء لا يمكن التراجع عنه.`,
+    async ()=>{
+      STATE.items = STATE.items.filter(it => !BULK_SELECTED.has(it.code));
+      BULK_SELECTED.clear();
+      await storeSet(KEYS.items, STATE.items);
+      META.itemsSavedAt = new Date().toISOString();
+      await storeSet(KEYS.meta, META);
+      updateSaveIndicators();
+      renderAll();
+      toast(`تم حذف ${n} صنف`);
+    }
+  );
+});
+document.getElementById('btnApplyBulk').addEventListener('click', async ()=>{
+  if(BULK_SELECTED.size === 0){ toast('حدد صنفًا واحدًا على الأقل'); return; }
+  const label = document.getElementById('bulkLabel').value.trim();
+  const pct = document.getElementById('bulkPct').value;
+  const cond = document.getElementById('bulkCond').value.trim();
+  if(pct === '' && cond === ''){ toast('اكتب نسبة أو وصف حالة على الأقل'); return; }
+  STATE.items.forEach(it=>{
+    if(!BULK_SELECTED.has(it.code)) return;
+    if(!it.classifications) it.classifications = [];
+    it.classifications.push({ id:newClassId(), label: label || nextClassLabel(it), pct, cond });
+  });
+  await storeSet(KEYS.items, STATE.items);
+  META.itemsSavedAt = new Date().toISOString();
+  await storeSet(KEYS.meta, META);
+  updateSaveIndicators();
+  renderItems(document.getElementById('itemsSearch').value);
+  toast(`تمت إضافة التصنيف إلى ${BULK_SELECTED.size} صنف وحُفظ`);
+});
+
+function trashIcon(){
+  return `<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7H20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M9 7V4.8C9 4.36 9.36 4 9.8 4H14.2C14.64 4 15 4.36 15 4.8V7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><path d="M6 7L6.9 19.1C6.94 19.6 7.35 20 7.86 20H16.14C16.65 20 17.06 19.6 17.1 19.1L18 7" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
+document.getElementById('itemsSearch').addEventListener('input', e=> renderItems(e.target.value));
+
+document.getElementById('btnSaveItems').addEventListener('click', async ()=>{
+  const ok = await storeSet(KEYS.items, STATE.items);
+  if(ok){
+    META.itemsSavedAt = new Date().toISOString();
+    await storeSet(KEYS.meta, META);
+    updateSaveIndicators();
+    flashSaved('itemsLastSaved');
+  }
+  toast(ok ? 'تم الحفظ — هيظهر تلقائي لما تفتح الملف تاني' : 'تعذر الحفظ، حاول مجددًا');
+});
+
+document.getElementById('btnAddItem').addEventListener('click', ()=>{
+  STATE.items.unshift({code:'', name:'', rcode: STATE.materials[0]?.code || '', rname: STATE.materials[0]?.name || '', classifications:[], src:'manual'});
+  renderItems(document.getElementById('itemsSearch').value);
+  toast('أضِف بيانات الصنف الجديد ثم احفظ');
+  const firstCell = document.querySelector('#itemsBody tr td');
+  if(firstCell) firstCell.scrollIntoView({behavior:'smooth', block:'center'});
+});
+
+document.getElementById('btnClearAllClassification').addEventListener('click', ()=>{
+  confirmAction(
+    'مسح كل التصنيفات',
+    `سيتم مسح كل التصنيفات (الفئات والنسب والأوصاف) من كل الأصناف الـ${STATE.items.length} دفعة واحدة. تقدر بعد كده تضيف تصنيف يدويًا لأي صنف عايزه، لصنف واحد أو لمجموعة محددة.`,
+    async ()=>{
+      STATE.items.forEach(it=>{ it.classifications = []; });
+      await storeSet(KEYS.items, STATE.items);
+      META.itemsSavedAt = new Date().toISOString();
+      await storeSet(KEYS.meta, META);
+      updateSaveIndicators();
+      renderItems(document.getElementById('itemsSearch').value);
+      toast('تم مسح كل التصنيفات وحُفظ');
+    }
+  );
+});
+
+document.getElementById('itemsBody').addEventListener('dblclick', (e)=>{
+  const td = e.target.closest('td');
+  if(!td) return;
+  if(td.closest('.class-list')) return; // classification cells have their own inline inputs
+  const tr = td.closest('tr');
+  const rows = Array.from(document.getElementById('itemsBody').children);
+  const rowIndex = rows.indexOf(tr);
+  const visibleItems = getVisibleItems(document.getElementById('itemsSearch').value);
+  const it = visibleItems[rowIndex];
+  if(!it) return;
+  const realIdx = STATE.items.indexOf(it);
+  const cellIndex = Array.from(tr.children).indexOf(td);
+  if(cellIndex === 1){
+    const v = prompt('كود الصنف', it.code);
+    if(v !== null){ STATE.items[realIdx].code = v.trim(); renderItems(document.getElementById('itemsSearch').value); }
+  } else if(cellIndex === 2){
+    const v = prompt('اسم الصنف', it.name);
+    if(v !== null){ STATE.items[realIdx].name = v.trim(); renderItems(document.getElementById('itemsSearch').value); }
+  } else if(cellIndex === 3){
+    const options = STATE.materials.map(m=>`${m.code} — ${m.name}`).join('\n');
+    const v = prompt('اكتب كود الخامة المرجعية الجديد:\n'+options, it.rcode);
+    if(v !== null){
+      const code = v.trim().split(' ')[0];
+      const mat = materialByCode(code);
+      if(mat){ STATE.items[realIdx].rcode = mat.code; STATE.items[realIdx].rname = mat.name; renderItems(document.getElementById('itemsSearch').value); toast('تم تحديث الخامة المرجعية'); }
+      else toast('كود الخامة غير موجود');
+    }
+  }
+});
+
+function getVisibleItems(filter){
+  const q = (filter||'').trim().toLowerCase();
+  if(!q) return STATE.items;
+  return STATE.items.filter(it => it.name.toLowerCase().includes(q) || it.code.toLowerCase().includes(q));
+}
+
+
+/* ---------------- Materials tab ---------------- */
+let BULK_SELECTED_MAT = new Set(); // material codes selected for bulk delete
+
+function updateMaterialsBulkToolbar(){
+  const toolbar = document.getElementById('materialsBulkToolbar');
+  const pill = document.getElementById('materialsSelectCountPill');
+  if(BULK_SELECTED_MAT.size > 0){
+    toolbar.style.display = 'flex';
+    pill.textContent = `${BULK_SELECTED_MAT.size} محدد`;
+  } else {
+    toolbar.style.display = 'none';
+  }
+}
+
+function renderMaterials(){
+  const body = document.getElementById('materialsBody');
+  body.innerHTML = '';
+  STATE.materials.forEach((m, idx)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" class="row-check bulk-check-mat" data-mcode="${escapeHtml(m.code)}" ${BULK_SELECTED_MAT.has(m.code) ? 'checked':''}></td>
+      <td class="code-cell" data-editable="code">${escapeHtml(m.code)}</td>
+      <td data-editable="name">${escapeHtml(m.name)}</td>
+      <td><input type="number" step="0.01" min="0" class="price-input" data-idx="${idx}" value="${m.price ?? ''}" placeholder="0.00"></td>
+      <td><button class="icon-btn" data-del="${idx}" title="حذف الخامة">${trashIcon()}</button></td>
+    `;
+    body.appendChild(tr);
+  });
+
+  body.querySelectorAll('input[data-idx]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      STATE.materials[Number(inp.dataset.idx)].price = inp.value;
+    });
+  });
+  body.querySelectorAll('.bulk-check-mat').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) BULK_SELECTED_MAT.add(cb.dataset.mcode);
+      else BULK_SELECTED_MAT.delete(cb.dataset.mcode);
+      updateMaterialsBulkToolbar();
+    });
+  });
+  body.querySelectorAll('[data-del]').forEach(b=>{
+    b.addEventListener('click', ()=> confirmAction(
+      'حذف الخامة',
+      `سيتم حذف "${STATE.materials[Number(b.dataset.del)].name}" من قائمة الخامات المرجعية.`,
+      async ()=>{
+        STATE.materials.splice(Number(b.dataset.del), 1);
+        await storeSet(KEYS.materials, STATE.materials);
+        renderAll();
+        toast('تم حذف الخامة');
+      }
+    ));
+  });
+
+  body.querySelectorAll('[data-editable]').forEach(td=>{
+    td.addEventListener('dblclick', ()=>{
+      const tr = td.closest('tr');
+      const idx = Array.from(body.children).indexOf(tr);
+      const field = td.dataset.editable;
+      const v = prompt(field==='code' ? 'كود الخامة' : 'اسم الخامة', STATE.materials[idx][field]);
+      if(v !== null){ STATE.materials[idx][field] = v.trim(); renderMaterials(); }
+    });
+  });
+}
+
+document.getElementById('materialsSelectAllBox').addEventListener('change', (e)=>{
+  if(e.target.checked) STATE.materials.forEach(m=> BULK_SELECTED_MAT.add(m.code));
+  else BULK_SELECTED_MAT.clear();
+  renderMaterials();
+  updateMaterialsBulkToolbar();
+});
+document.getElementById('btnClearMaterialsBulkSelect').addEventListener('click', ()=>{
+  BULK_SELECTED_MAT.clear();
+  renderMaterials();
+  updateMaterialsBulkToolbar();
+});
+document.getElementById('btnDeleteBulkMat').addEventListener('click', ()=>{
+  if(BULK_SELECTED_MAT.size === 0) return;
+  const n = BULK_SELECTED_MAT.size;
+  confirmAction(
+    'حذف الخامات المحددة',
+    `سيتم حذف ${n} خامة نهائيًا. تأكد إن مفيش أصناف بتستخدمها كخامة مرجعية قبل الحذف.`,
+    async ()=>{
+      STATE.materials = STATE.materials.filter(m => !BULK_SELECTED_MAT.has(m.code));
+      BULK_SELECTED_MAT.clear();
+      await storeSet(KEYS.materials, STATE.materials);
+      META.materialsSavedAt = new Date().toISOString();
+      await storeSet(KEYS.meta, META);
+      updateSaveIndicators();
+      renderAll();
+      toast(`تم حذف ${n} خامة`);
+    }
+  );
+});
+
+document.getElementById('btnSaveMaterials').addEventListener('click', async ()=>{
+  const ok = await storeSet(KEYS.materials, STATE.materials);
+  if(ok){
+    META.materialsSavedAt = new Date().toISOString();
+    await storeSet(KEYS.meta, META);
+    updateSaveIndicators();
+    flashSaved('materialsLastSaved');
+  }
+  toast(ok ? 'تم الحفظ — هيظهر تلقائي لما تفتح الملف تاني' : 'تعذر الحفظ، حاول مجددًا');
+});
+
+document.getElementById('btnAddMaterial').addEventListener('click', ()=>{
+  STATE.materials.unshift({code:'', name:'', price:''});
+  renderMaterials();
+  toast('أضِف بيانات الخامة ثم احفظ (انقر مرتين على الكود/الاسم للتعديل)');
+});
+
+/* ---------------- Pricing tab: segmented pick views ---------------- */
+document.querySelectorAll('.pick-seg-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.pick-seg-btn').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.pick-view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('pickview-'+btn.dataset.pick).classList.add('active');
+  });
+});
+
+let SELECTED = new Set();      // item codes
+let SELECTED_MAT = new Set();  // material codes
+
+function updateSelectCountPill(){
+  const n = SELECTED.size + SELECTED_MAT.size;
+  document.getElementById('selectCountPill').textContent = `${n} محدد`;
+}
+
+function renderPickList(filter){
+  const body = document.getElementById('pickBody');
+  const q = (filter||'').trim().toLowerCase();
+  body.innerHTML = '';
+  STATE.items.forEach((it)=>{
+    if(q && !(it.name.toLowerCase().includes(q) || it.code.toLowerCase().includes(q))) return;
+    const mat = materialByCode(it.rcode);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" class="row-check" data-code="${escapeHtml(it.code)}" ${SELECTED.has(it.code) ? 'checked':''}></td>
+      <td class="code-cell">${escapeHtml(it.code)}</td>
+      <td>${escapeHtml(it.name)}</td>
+      <td>${mat ? escapeHtml(mat.name) : '—'}</td>
+    `;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll('.row-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) SELECTED.add(cb.dataset.code);
+      else SELECTED.delete(cb.dataset.code);
+      updateSelectCountPill();
+    });
+  });
+}
+
+function renderPickMatList(){
+  const body = document.getElementById('pickMatBody');
+  body.innerHTML = '';
+  STATE.materials.forEach((m)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="checkbox" class="row-check" data-mcode="${escapeHtml(m.code)}" ${SELECTED_MAT.has(m.code) ? 'checked':''}></td>
+      <td class="code-cell">${escapeHtml(m.code)}</td>
+      <td>${escapeHtml(m.name)}</td>
+      <td>${fmtMoney(m.price)}</td>
+    `;
+    body.appendChild(tr);
+  });
+  body.querySelectorAll('.row-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) SELECTED_MAT.add(cb.dataset.mcode);
+      else SELECTED_MAT.delete(cb.dataset.mcode);
+      updateSelectCountPill();
+    });
+  });
+}
+
+document.getElementById('pricingSearch').addEventListener('input', e=> renderPickList(e.target.value));
+document.getElementById('btnSelectAll').addEventListener('click', ()=>{
+  getVisibleItems(document.getElementById('pricingSearch').value).forEach(it=> SELECTED.add(it.code));
+  renderPickList(document.getElementById('pricingSearch').value);
+  updateSelectCountPill();
+});
+document.getElementById('btnClearSelect').addEventListener('click', ()=>{
+  SELECTED.clear();
+  renderPickList(document.getElementById('pricingSearch').value);
+  updateSelectCountPill();
+});
+document.getElementById('btnSelectAllMat').addEventListener('click', ()=>{
+  STATE.materials.forEach(m=> SELECTED_MAT.add(m.code));
+  renderPickMatList();
+  updateSelectCountPill();
+});
+document.getElementById('btnClearSelectMat').addEventListener('click', ()=>{
+  SELECTED_MAT.clear();
+  renderPickMatList();
+  updateSelectCountPill();
+});
+
+/* Build long-format rows: one row per classification entry the item has, plus one row per selected
+   raw material. Each row keeps a back-reference (itemCode+classId, or matCode) so edits can optionally
+   be written back to the master items/materials data. */
+function buildSheetRows(itemCodes, matCodes){
+  const rows = [];
+  itemCodes.forEach(code=>{
+    const it = STATE.items.find(i=>i.code === code);
+    if(!it) return;
+    const mat = materialByCode(it.rcode);
+    const refPrice = mat ? Number(mat.price) : NaN;
+    (it.classifications || []).forEach(cl=>{
+      const pct = cl.pct === '' || cl.pct === undefined || cl.pct === null ? null : Number(cl.pct);
+      const price = (!isNaN(refPrice) && pct !== null && !isNaN(pct)) ? refPrice * pct / 100 : null;
+      rows.push({
+        itemCode: it.code, classId: cl.id, refMatCode: it.rcode, matCode: null,
+        name: it.name, grade: cl.label || '', cond: cl.cond || '', pct,
+        rname: mat ? mat.name : it.rname, rcode: mat ? mat.code : it.rcode,
+        refPrice: isNaN(refPrice) ? null : refPrice,
+        price, priceOverridden:false
+      });
+    });
+  });
+  matCodes.forEach(code=>{
+    const m = materialByCode(code);
+    if(!m) return;
+    const price = m.price === '' ? null : Number(m.price);
+    rows.push({
+      itemCode: null, classId: null, refMatCode: m.code, matCode: m.code,
+      name: m.name, grade:'—', cond:'خامة مرجعية', pct: 100,
+      rname: m.name, rcode: m.code,
+      refPrice: isNaN(price) ? null : price,
+      price: isNaN(price) ? null : price, priceOverridden:false
+    });
+  });
+  return rows;
+}
+
+/* Read-only render, used for monthly record view (immutable snapshots) */
+function renderSheetTable(bodyEl, rows){
+  bodyEl.innerHTML = rows.map(r => `
+    <tr>
+      <td>${escapeHtml(r.name)}</td>
+      <td><span class="badge ${r.grade==='أ' ? 'a' : (r.grade==='ب' ? 'b':'')}">${escapeHtml(r.grade)}</span></td>
+      <td>${escapeHtml(r.cond || '—')}</td>
+      <td>${r.pct !== null && r.pct !== undefined ? r.pct+'%' : '—'}</td>
+      <td>${escapeHtml(r.rname)}</td>
+      <td class="code-cell">${escapeHtml(r.rcode)}</td>
+      <td>${fmtMoney(r.refPrice)}</td>
+      <td><strong>${fmtMoney(r.price)}</strong></td>
+    </tr>
+  `).join('');
+}
+
+/* Editable render, used for the live pricing sheet being built */
+function renderSheetTableEditable(){
+  const bodyEl = document.getElementById('sheetBody');
+  bodyEl.innerHTML = CURRENT_SHEET.map((r, i) => `
+    <tr>
+      <td><input type="text" class="cell-edit name-edit" data-ridx="${i}" data-field="name" value="${escapeHtml(r.name)}"></td>
+      <td>${r.matCode ? '<span class="badge">—</span>' : `<input type="text" class="cell-edit" style="width:56px; font-weight:800;" data-ridx="${i}" data-field="grade" value="${escapeHtml(r.grade || '')}">`}</td>
+      <td><input type="text" class="cell-edit" data-ridx="${i}" data-field="cond" value="${escapeHtml(r.cond || '')}" placeholder="—"></td>
+      <td>${r.matCode ? '100%' : `<input type="number" step="0.1" min="0" max="100" class="cell-edit" data-ridx="${i}" data-field="pct" value="${r.pct ?? ''}">`}</td>
+      <td>${escapeHtml(r.rname)}</td>
+      <td class="code-cell">${escapeHtml(r.rcode)}</td>
+      <td><input type="number" step="0.01" class="cell-edit" data-ridx="${i}" data-field="refPrice" value="${r.refPrice ?? ''}"></td>
+      <td>
+        <input type="number" step="0.01" class="cell-edit price-edit ${r.priceOverridden ? 'overridden':''}" data-ridx="${i}" data-field="price" value="${r.price ?? ''}">
+        ${r.priceOverridden ? `<button class="reset-price-btn" data-reset="${i}" title="إعادة الحساب تلقائيًا">↺</button>` : ''}
+      </td>
+      <td><button class="remove-row-btn" data-removerow="${i}" title="إزالة هذا السطر من الكشف">×</button></td>
+    </tr>
+  `).join('');
+
+  bodyEl.querySelectorAll('input[data-ridx]').forEach(inp=>{
+    inp.addEventListener('input', ()=>{
+      const i = Number(inp.dataset.ridx);
+      const field = inp.dataset.field;
+      const row = CURRENT_SHEET[i];
+      if(field === 'name' || field === 'cond' || field === 'grade'){
+        row[field] = inp.value;
+      } else if(field === 'pct'){
+        row.pct = inp.value === '' ? null : Number(inp.value);
+        if(!row.priceOverridden) recomputeRowPrice(row);
+      } else if(field === 'refPrice'){
+        row.refPrice = inp.value === '' ? null : Number(inp.value);
+        if(!row.priceOverridden) recomputeRowPrice(row);
+      } else if(field === 'price'){
+        row.price = inp.value === '' ? null : Number(inp.value);
+        row.priceOverridden = true;
+      }
+      // refresh just the price cell + reset button + summary, without a full re-render (keeps focus)
+      const tr = inp.closest('tr');
+      const priceInput = tr.querySelector('[data-field="price"]');
+      if(field !== 'price' && priceInput){ priceInput.value = row.price ?? ''; priceInput.classList.toggle('overridden', row.priceOverridden); }
+      renderSummary('sheetSummary', CURRENT_SHEET);
+    });
+  });
+  bodyEl.querySelectorAll('[data-reset]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = Number(btn.dataset.reset);
+      const row = CURRENT_SHEET[i];
+      row.priceOverridden = false;
+      recomputeRowPrice(row);
+      renderSheetTableEditable();
+      renderSummary('sheetSummary', CURRENT_SHEET);
+    });
+  });
+  bodyEl.querySelectorAll('[data-removerow]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const i = Number(btn.dataset.removerow);
+      CURRENT_SHEET.splice(i, 1);
+      renderSheetTableEditable();
+      renderSummary('sheetSummary', CURRENT_SHEET);
+      document.getElementById('sheetMeta').textContent = `${CURRENT_SHEET.length} سطر — تم الإنشاء بتاريخ ${new Date().toLocaleDateString('ar-EG')}`;
+    });
+  });
+}
+
+function recomputeRowPrice(row){
+  if(row.refPrice !== null && row.refPrice !== undefined && !isNaN(row.refPrice) && row.pct !== null && row.pct !== undefined && !isNaN(row.pct)){
+    row.price = row.refPrice * row.pct / 100;
+  } else {
+    row.price = null;
+  }
+}
+
+let CURRENT_SHEET = [];
+
+function defaultSheetTitle(){
+  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const now = new Date();
+  return `تسعير مجروشات عن شهر ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+document.getElementById('btnBuildSheet').addEventListener('click', ()=>{
+  if(SELECTED.size === 0 && SELECTED_MAT.size === 0){ toast('اختر صنفًا أو خامة واحدة على الأقل'); return; }
+  CURRENT_SHEET = buildSheetRows(Array.from(SELECTED), Array.from(SELECTED_MAT));
+  if(CURRENT_SHEET.length === 0){ toast('الأصناف المحددة ليس لها نسب تصنيف محفوظة بعد'); return; }
+  renderSheetTableEditable();
+  document.getElementById('sheetMeta').textContent = `${CURRENT_SHEET.length} سطر — تم الإنشاء بتاريخ ${new Date().toLocaleDateString('ar-EG')}`;
+  const titleInput = document.getElementById('sheetTitleInput');
+  if(!titleInput.value) titleInput.value = defaultSheetTitle();
+  document.getElementById('sheetTitleHeading').textContent = titleInput.value;
+  renderSummary('sheetSummary', CURRENT_SHEET);
+  document.getElementById('sheetPanel').style.display = 'block';
+  document.getElementById('sheetPanel').scrollIntoView({behavior:'smooth', block:'start'});
+});
+
+document.getElementById('sheetTitleInput').addEventListener('input', (e)=>{
+  document.getElementById('sheetTitleHeading').textContent = e.target.value;
+});
+
+function renderSummary(elId, rows){
+  const priced = rows.filter(r=>r.price !== null && r.price !== undefined && !isNaN(r.price));
+  const avg = priced.length ? priced.reduce((s,r)=>s+r.price,0)/priced.length : null;
+  const max = priced.length ? Math.max(...priced.map(r=>r.price)) : null;
+  const min = priced.length ? Math.min(...priced.map(r=>r.price)) : null;
+  document.getElementById(elId).innerHTML = `
+    <div class="summary-card"><div class="n">${rows.length}</div><div class="l">إجمالي السطور</div></div>
+    <div class="summary-card"><div class="n">${fmtMoney(avg)}</div><div class="l">متوسط السعر</div></div>
+    <div class="summary-card"><div class="n">${fmtMoney(max)}</div><div class="l">أعلى سعر</div></div>
+    <div class="summary-card"><div class="n">${fmtMoney(min)}</div><div class="l">أقل سعر</div></div>
+  `;
+}
+
+/* ---------------- Apply sheet edits back to master data (optional) ---------------- */
+document.getElementById('btnApplySheetEdits').addEventListener('click', async ()=>{
+  if(!CURRENT_SHEET.length){ toast('أنشئ الكشف أولًا'); return; }
+  const applyToMaster = document.getElementById('applyToMasterToggle').checked;
+  if(!applyToMaster){
+    toast('التعديلات محفوظة في هذا الكشف فقط ولم تُطبَّق على بيانات الأصناف أو الخامات الأصلية');
+    return;
+  }
+  let touchedItems = 0, touchedMats = new Set();
+  CURRENT_SHEET.forEach(row=>{
+    if(row.itemCode && row.classId){
+      const it = STATE.items.find(i=>i.code === row.itemCode);
+      if(it){
+        if(!it.classifications) it.classifications = [];
+        const cl = it.classifications.find(c=>c.id === row.classId);
+        if(cl){
+          cl.label = row.grade || cl.label;
+          cl.pct = row.pct === null || row.pct === undefined ? '' : row.pct;
+          cl.cond = row.cond || '';
+        }
+        it.name = row.name || it.name;
+        touchedItems++;
+      }
+    }
+    if(row.refMatCode && row.refPrice !== null && row.refPrice !== undefined && !isNaN(row.refPrice)){
+      const m = materialByCode(row.refMatCode);
+      if(m){ m.price = row.refPrice; touchedMats.add(m.code); }
+    }
+  });
+  await storeSet(KEYS.items, STATE.items);
+  await storeSet(KEYS.materials, STATE.materials);
+  META.itemsSavedAt = new Date().toISOString();
+  META.materialsSavedAt = new Date().toISOString();
+  await storeSet(KEYS.meta, META);
+  updateSaveIndicators();
+  renderItems(document.getElementById('itemsSearch').value);
+  renderMaterials();
+  toast(`تم تطبيق التعديلات على البيانات الأصلية (${touchedItems} صنف، ${touchedMats.size} خامة) وحُفظت`);
+});
+
+/* ---------------- Export helpers ---------------- */
+function exportToExcelStyled(rows, filename, title){
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet('كشف التسعير', { views: [{ rightToLeft: true }] });
+
+  const headers = ['الصنف','الفئة','وصف الحالة','النسبة','الصنف المرجعي','الكود المرجعي','السعر المرجعي (ج.م)','السعر (ج.م/طن)'];
+  ws.columns = [
+    {width:30},{width:9},{width:20},{width:10},{width:22},{width:15},{width:18},{width:18}
+  ];
+
+  // Title row
+  ws.mergeCells(1,1,1,headers.length);
+  const titleCell = ws.getCell(1,1);
+  titleCell.value = title || 'كشف تسعير المجروشات';
+  titleCell.font = { bold:true, size:16, color:{argb:'FF1B2226'} };
+  titleCell.alignment = { horizontal:'center', vertical:'middle' };
+  titleCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFBEADB'} };
+  ws.getRow(1).height = 30;
+
+  // Sub-line: export date
+  ws.mergeCells(2,1,2,headers.length);
+  const subCell = ws.getCell(2,1);
+  subCell.value = 'تاريخ الإصدار: ' + new Date().toLocaleDateString('ar-EG');
+  subCell.font = { italic:true, size:10, color:{argb:'FF5B6469'} };
+  subCell.alignment = { horizontal:'center' };
+  ws.getRow(2).height = 18;
+
+  // Header row
+  const headerRowIdx = 3;
+  const headerRow = ws.getRow(headerRowIdx);
+  headers.forEach((h, i)=>{
+    const cell = headerRow.getCell(i+1);
+    cell.value = h;
+    cell.font = { bold:true, color:{argb:'FFFFFFFF'}, size:11 };
+    cell.alignment = { horizontal:'center', vertical:'middle' };
+    cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFD9762A'} };
+    cell.border = thinBorder();
+  });
+  headerRow.height = 22;
+
+  rows.forEach((r, idx)=>{
+    const rowIdx = headerRowIdx + 1 + idx;
+    const row = ws.getRow(rowIdx);
+    const values = [
+      r.name, r.grade, r.cond || '—',
+      (r.pct !== null && r.pct !== undefined) ? (r.pct/100) : null,
+      r.rname, r.rcode, r.refPrice ?? null, r.price ?? null
+    ];
+    values.forEach((v, i)=>{
+      const cell = row.getCell(i+1);
+      cell.value = v;
+      cell.alignment = { horizontal:'center', vertical:'middle' };
+      cell.border = thinBorder();
+      if(i === 3 && v !== null) cell.numFmt = '0%';
+      if((i === 6 || i === 7) && v !== null) cell.numFmt = '#,##0.00 "ج.م"';
+      const bandColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF5F7F6';
+      cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:bandColor} };
+    });
+    // grade badge coloring
+    const gradeCell = row.getCell(2);
+    if(r.grade === 'أ'){
+      gradeCell.font = { bold:true, color:{argb:'FF2E6F8E'} };
+      gradeCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE4EFF3'} };
+    } else if(r.grade === 'ب'){
+      gradeCell.font = { bold:true, color:{argb:'FF4C7A5E'} };
+      gradeCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE7F0EA'} };
+    }
+    row.getCell(8).font = { bold:true };
+  });
+
+  ws.views = [{ state:'frozen', ySplit: headerRowIdx, rightToLeft:true }];
+
+  wb.xlsx.writeBuffer().then(buffer=>{
+    const blob = new Blob([buffer], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename + '.xlsx'; a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+function thinBorder(){
+  const s = { style:'thin', color:{argb:'FFDBE1DF'} };
+  return { top:s, bottom:s, left:s, right:s };
+}
+
+function exportToImage(captureElId, filename){
+  const el = document.getElementById(captureElId);
+  html2canvas(el, {backgroundColor:'#ffffff', scale:2}).then(canvas=>{
+    const link = document.createElement('a');
+    link.download = filename + '.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  });
+}
+
+document.getElementById('btnExportExcel').addEventListener('click', ()=>{
+  if(!CURRENT_SHEET.length) return;
+  const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
+  exportToExcelStyled(CURRENT_SHEET, 'كشف_تسعير_المجروشات', title);
+  toast('تم تصدير ملف Excel');
+});
+document.getElementById('btnExportImage').addEventListener('click', ()=>{
+  if(!CURRENT_SHEET.length) return;
+  exportToImage('sheetCapture', 'كشف_تسعير_المجروشات');
+  toast('جارٍ تنزيل الصورة…');
+});
+document.getElementById('btnPrintSheet').addEventListener('click', ()=> window.print());
+
+/* ---------------- Monthly records ---------------- */
+document.getElementById('btnSaveRecord').addEventListener('click', ()=>{
+  if(!CURRENT_SHEET.length){ toast('أنشئ الكشف أولًا'); return; }
+  const modal = document.getElementById('recordModal');
+  const input = document.getElementById('recordLabelInput');
+  input.value = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
+  modal.classList.add('show');
+  input.focus();
+});
+document.getElementById('recordModalCancel').addEventListener('click', ()=> document.getElementById('recordModal').classList.remove('show'));
+document.getElementById('recordModalOk').addEventListener('click', async ()=>{
+  const label = document.getElementById('recordLabelInput').value.trim() || 'كشف بدون اسم';
+  const record = {
+    id: 'r_' + Date.now(),
+    label,
+    title: label,
+    date: new Date().toISOString(),
+    rows: CURRENT_SHEET
+  };
+  STATE.records.unshift(record);
+  await storeSet(KEYS.records, STATE.records);
+  document.getElementById('recordModal').classList.remove('show');
+  renderRecords();
+  updateHeaderStats();
+  toast('تم حفظ السجل الشهري');
+});
+
+function renderRecords(){
+  const list = document.getElementById('recordsList');
+  list.innerHTML = '';
+  document.getElementById('recordsEmpty').style.display = STATE.records.length ? 'none' : 'block';
+  STATE.records.forEach(rec=>{
+    const div = document.createElement('div');
+    div.className = 'record-item';
+    const d = new Date(rec.date);
+    div.innerHTML = `
+      <div class="record-info">
+        <span class="rn">${escapeHtml(rec.label)}</span>
+        <span class="rd">${d.toLocaleDateString('ar-EG')} — ${rec.rows.length} سطر</span>
+      </div>
+      <div class="record-actions">
+        <button class="btn btn-sm" data-view="${rec.id}">عرض</button>
+        <button class="btn btn-sm btn-danger" data-del="${rec.id}">حذف</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+  list.querySelectorAll('[data-view]').forEach(b=>{
+    b.addEventListener('click', ()=> openRecordView(b.dataset.view));
+  });
+  list.querySelectorAll('[data-del]').forEach(b=>{
+    b.addEventListener('click', ()=> confirmAction(
+      'حذف السجل',
+      'سيتم حذف هذا السجل الشهري نهائيًا.',
+      async ()=>{
+        STATE.records = STATE.records.filter(r=>r.id !== b.dataset.del);
+        await storeSet(KEYS.records, STATE.records);
+        renderRecords();
+        updateHeaderStats();
+        document.getElementById('recordViewPanel').style.display = 'none';
+        toast('تم حذف السجل');
+      }
+    ));
+  });
+}
+
+let ACTIVE_RECORD = null;
+function openRecordView(id){
+  const rec = STATE.records.find(r=>r.id === id);
+  if(!rec) return;
+  ACTIVE_RECORD = rec;
+  document.getElementById('recordViewTitle').textContent = rec.label;
+  document.getElementById('recordViewMeta').textContent = `${new Date(rec.date).toLocaleString('ar-EG')} — ${rec.rows.length} سطر`;
+  document.getElementById('recordTitleHeading').textContent = rec.title || rec.label;
+  renderSheetTable(document.getElementById('recordViewBody'), rec.rows);
+  document.getElementById('recordViewPanel').style.display = 'block';
+  document.getElementById('recordViewPanel').scrollIntoView({behavior:'smooth', block:'start'});
+}
+document.getElementById('btnCloseRecordView').addEventListener('click', ()=>{
+  document.getElementById('recordViewPanel').style.display = 'none';
+});
+document.getElementById('btnExportRecordExcel').addEventListener('click', ()=>{
+  if(!ACTIVE_RECORD) return;
+  exportToExcelStyled(ACTIVE_RECORD.rows, ACTIVE_RECORD.label.replace(/\s+/g,'_'), ACTIVE_RECORD.title || ACTIVE_RECORD.label);
+  toast('تم تصدير ملف Excel');
+});
+document.getElementById('btnExportRecordImage').addEventListener('click', ()=>{
+  if(!ACTIVE_RECORD) return;
+  exportToImage('recordCapture', ACTIVE_RECORD.label.replace(/\s+/g,'_'));
+  toast('جارٍ تنزيل الصورة…');
+});
+document.getElementById('btnPrintRecord').addEventListener('click', ()=> window.print());
+
+/* ---------------- Global header search ---------------- */
+const gSearch = document.getElementById('globalSearch');
+const gResults = document.getElementById('globalSearchResults');
+gSearch.addEventListener('input', ()=>{
+  const q = gSearch.value.trim().toLowerCase();
+  if(!q){ gResults.classList.remove('show'); return; }
+  const itemMatches = STATE.items.filter(it=> it.name.toLowerCase().includes(q) || it.code.toLowerCase().includes(q)).slice(0,6);
+  const matMatches = STATE.materials.filter(m=> m.name.toLowerCase().includes(q) || m.code.toLowerCase().includes(q)).slice(0,4);
+  if(itemMatches.length === 0 && matMatches.length === 0){
+    gResults.innerHTML = '<div class="hsr-empty">لا توجد نتائج</div>';
+  } else {
+    gResults.innerHTML = [
+      ...itemMatches.map(it=>`<div class="hsr-item" data-jump="item" data-q="${escapeHtml(it.code)}"><div class="hn">${escapeHtml(it.name)}</div><div class="hc">${escapeHtml(it.code)} — صنف</div></div>`),
+      ...matMatches.map(m=>`<div class="hsr-item" data-jump="material" data-q="${escapeHtml(m.code)}"><div class="hn">${escapeHtml(m.name)}</div><div class="hc">${escapeHtml(m.code)} — خامة مرجعية</div></div>`)
+    ].join('');
+  }
+  gResults.classList.add('show');
+  gResults.querySelectorAll('[data-jump]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      if(el.dataset.jump === 'item'){
+        switchTab('items');
+        document.getElementById('itemsSearch').value = el.dataset.q;
+        renderItems(el.dataset.q);
+      } else {
+        switchTab('materials');
+      }
+      gResults.classList.remove('show');
+      gSearch.value = '';
+    });
+  });
+});
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.header-search')) gResults.classList.remove('show');
+});
+
+/* ---------------- Confirm modal ---------------- */
+let CONFIRM_CB = null;
+function confirmAction(title, text, cb){
+  document.getElementById('confirmTitle').textContent = title;
+  document.getElementById('confirmText').textContent = text;
+  CONFIRM_CB = cb;
+  document.getElementById('confirmModal').classList.add('show');
+}
+document.getElementById('confirmCancel').addEventListener('click', ()=>{
+  document.getElementById('confirmModal').classList.remove('show');
+  CONFIRM_CB = null;
+});
+document.getElementById('confirmOk').addEventListener('click', async ()=>{
+  document.getElementById('confirmModal').classList.remove('show');
+  if(CONFIRM_CB) await CONFIRM_CB();
+  CONFIRM_CB = null;
+});
+
+/* ---------------- Backup export / import ---------------- */
+document.getElementById('btnBackupExport').addEventListener('click', ()=>{
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    items: STATE.items,
+    materials: STATE.materials,
+    records: STATE.records
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const stamp = new Date().toISOString().slice(0,10);
+  a.href = url;
+  a.download = `نسخة_احتياطية_تسعير_المجروشات_${stamp}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('تم تنزيل النسخة الاحتياطية');
+});
+
+document.getElementById('btnBackupImport').addEventListener('click', ()=>{
+  document.getElementById('backupFileInput').click();
+});
+document.getElementById('backupFileInput').addEventListener('change', (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    let data;
+    try{ data = JSON.parse(reader.result); }
+    catch(err){ toast('الملف غير صالح'); return; }
+    if(!data.items || !data.materials){ toast('الملف لا يحتوي على بيانات صحيحة'); return; }
+    confirmAction(
+      'استيراد نسخة احتياطية',
+      'سيتم استبدال كل البيانات الحالية (الأصناف، الخامات، السجلات) بالبيانات الموجودة في هذا الملف.',
+      async ()=>{
+        STATE.items = data.items;
+        STATE.materials = data.materials;
+        STATE.records = data.records || [];
+        await storeSet(KEYS.items, STATE.items);
+        await storeSet(KEYS.materials, STATE.materials);
+        await storeSet(KEYS.records, STATE.records);
+        META.itemsSavedAt = new Date().toISOString();
+        META.materialsSavedAt = new Date().toISOString();
+        await storeSet(KEYS.meta, META);
+        renderAll();
+        updateSaveIndicators();
+        toast('تم استرجاع النسخة الاحتياطية بنجاح');
+      }
+    );
+    e.target.value = '';
+  };
+  reader.readAsText(file, 'utf-8');
+});
+
+/* ---------------- Render all ---------------- */
+function renderAll(){
+  renderItems(document.getElementById('itemsSearch').value);
+  updateItemsBulkToolbar();
+  renderMaterials();
+  updateMaterialsBulkToolbar();
+  renderPickList(document.getElementById('pricingSearch').value);
+  renderPickMatList();
+  updateSelectCountPill();
+  renderRecords();
+  updateHeaderStats();
+}
+
+boot();
+})();
+
+</script>
+</body>
+</html>

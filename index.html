@@ -10,6 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 :root{
   --bg:#EDF0EF;
@@ -265,6 +266,28 @@ tbody tr:hover{background:var(--panel-2);}
 .modal p{margin:0 0 14px; font-size:13px; color:var(--ink-soft);}
 .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:16px;}
 
+/* ---------- Email modal ---------- */
+.modal-wide{max-width:480px;}
+.email-book-list{
+  max-height:170px; overflow-y:auto; border:1px solid var(--line); border-radius:var(--radius-s);
+  padding:8px 10px; margin-bottom:12px; display:flex; flex-direction:column; gap:7px;
+}
+.email-row{display:flex; align-items:center; gap:8px; font-size:13px;}
+.email-row .er-email{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.email-row .er-tag{font-size:10.5px; color:var(--muted); white-space:nowrap;}
+.email-row .er-remove{border:none; background:none; color:var(--muted); cursor:pointer; font-size:14px; flex-shrink:0;}
+.email-row .er-remove:hover{color:var(--danger);}
+.email-empty{font-size:12.5px; color:var(--muted); text-align:center; padding:8px 4px;}
+.email-add-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+.email-add-row input[type=text]{
+  flex:1; min-width:170px; padding:8px 10px; border:1px solid var(--line-strong);
+  border-radius:var(--radius-s); font-size:13px;
+}
+.email-save-check{font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:4px; white-space:nowrap;}
+.email-format-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:13px; margin-bottom:2px;}
+.email-format-row label{display:flex; align-items:center; gap:5px;}
+.email-format-row .ef-label{font-weight:700; color:var(--ink-soft); font-size:12.5px;}
+
 @media (max-width:640px){
   .app-header{flex-direction:column; align-items:flex-start;}
   .header-stats{gap:16px;}
@@ -396,8 +419,87 @@ tbody tr:hover{background:var(--panel-2);}
 .reset-price-btn:hover{color:var(--amber-dark);}
 
 .sheet-title-heading{
-  text-align:center; font-size:19px; font-weight:900; padding:14px 10px 10px; color:var(--ink);
+  text-align:center; font-size:19px; font-weight:900; padding:0; color:var(--ink);
 }
+
+.export-date{
+  text-align:center; font-size:11.5px; color:var(--ink-soft); margin:2px 0 14px; font-weight:600;
+}
+
+/* Fully-ruled grid for the exported price table (vertical + horizontal lines) */
+.price-sheet-table{border:1px solid var(--line-strong);}
+.price-sheet-table thead th{
+  border:1px solid var(--line-strong); border-top:none;
+}
+.price-sheet-table thead th:first-child{border-right:none;}
+.price-sheet-table thead th:last-child{border-left:none;}
+.price-sheet-table tbody td{
+  border:1px solid var(--line-strong);
+}
+.price-sheet-table tbody td:first-child{border-right:none;}
+.price-sheet-table tbody td:last-child{border-left:none;}
+.price-sheet-table tbody tr:last-child td{border-bottom:none;}
+.price-sheet-table tbody tr:nth-child(even){background:var(--panel-2);}
+
+/* ---------- Item code shown under the name (no extra column) ---------- */
+.item-code-tag{font-size:11px; color:var(--muted); font-weight:600; margin-top:2px;}
+.name-cell-wrap{display:flex; flex-direction:column; gap:2px;}
+
+/* ---------- Export header (logo + title) ---------- */
+.export-header{
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  padding:6px 6px 16px; border-bottom:2px solid var(--amber); margin-bottom:6px;
+}
+.export-header .export-logo{height:60px; width:auto; display:block; flex-shrink:0;}
+.export-header .sheet-title-heading{flex:1;}
+.export-header .export-header-spacer{width:60px; flex-shrink:0;}
+
+/* ---------- Column remove control ---------- */
+.col-th-inner{display:flex; align-items:center; justify-content:center; gap:5px; white-space:nowrap;}
+.col-remove-btn{
+  border:none; background:none; cursor:pointer; color:var(--muted); font-size:12px; line-height:1;
+  padding:2px 3px; border-radius:3px; flex-shrink:0;
+}
+.col-remove-btn:hover{color:var(--danger); background:#FBEEEE;}
+.columns-toolbar{
+  display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px;
+}
+.columns-toolbar .ct-label{font-size:12.5px; color:var(--ink-soft); font-weight:700;}
+
+/* ---------- Committee section ---------- */
+.committee-section{
+  margin-top:22px; padding-top:16px; border-top:2px solid var(--line-strong);
+}
+.committee-title{font-size:15px; font-weight:900; text-align:center; margin-bottom:16px;}
+.committee-grid{display:flex; flex-wrap:wrap; gap:30px; justify-content:center; padding:0 10px;}
+.committee-member-card{min-width:150px; text-align:center; position:relative;}
+.committee-member-card .cm-name{font-weight:700; font-size:13.5px; margin-bottom:30px;}
+.committee-member-card .cm-line{border-top:1px solid var(--ink-soft); padding-top:4px; font-size:10.5px; color:var(--muted);}
+.committee-member-card .cm-remove{
+  position:absolute; top:-8px; left:50%; transform:translateX(50%);
+  border:none; background:var(--panel); color:var(--muted); cursor:pointer; font-size:12px;
+  border-radius:50%; width:18px; height:18px; box-shadow:0 0 0 1px var(--line-strong);
+}
+.committee-member-card .cm-remove:hover{color:var(--danger);}
+.committee-empty{text-align:center; color:var(--muted); font-size:12.5px; padding:6px;}
+.committee-add-row{
+  display:flex; gap:8px; justify-content:center; margin-top:18px; flex-wrap:wrap;
+}
+.committee-add-row input[type=text]{
+  padding:8px 12px; border:1px solid var(--line-strong); border-radius:var(--radius-s);
+  font-size:13px; min-width:200px;
+}
+
+/* ---------- Fixed footer note ---------- */
+.footer-note{
+  margin-top:18px; padding-top:10px; font-size:12px; color:var(--ink-soft); text-align:right;
+}
+
+/* Hide UI-only controls when exporting to image / printing */
+@media print{
+  .no-export{display:none !important;}
+}
+body.exporting-capture .no-export{display:none !important;}
 
 .sheet-title-field{margin-bottom:14px;}
 .sheet-title-field label{display:block; font-size:12.5px; font-weight:700; color:var(--ink-soft); margin-bottom:5px;}
@@ -651,37 +753,49 @@ tbody tr:hover{background:var(--panel-2);}
           <button class="btn btn-sm" id="btnPrintSheet">طباعة</button>
           <button class="btn btn-sm" id="btnExportExcel">تصدير Excel</button>
           <button class="btn btn-sm" id="btnExportImage">تصدير صورة</button>
+          <button class="btn btn-sm" id="btnExportPdf">تصدير PDF</button>
+          <button class="btn btn-sm btn-ghost" id="btnEmailPdf" title="تنزيل PDF وفتح Outlook Web لإرساله">✉ إرسال بالإيميل</button>
           <button class="btn btn-sm btn-primary" id="btnSaveRecord">حفظ كسجل شهري</button>
         </div>
       </div>
 
       <div class="sheet-title-field">
-        <label>عنوان الكشف (يظهر في أعلى الصورة وملف Excel)</label>
-        <input type="text" id="sheetTitleInput" placeholder="تسعير مجروشات عن شهر …">
+        <label>عنوان الكشف (يظهر في المنتصف أعلى الصورة وملف Excel، بجانب شعار الأمل)</label>
+        <input type="text" id="sheetTitleInput" placeholder="اسعار استرشادية لخامات مجروشات عن شهر …">
       </div>
 
       <div class="summary-strip" id="sheetSummary"></div>
 
-      <p class="panel-desc" style="margin-bottom:10px;">يمكنك التعديل مباشرة في أي خانة بالجدول (الاسم، وصف الحالة، النسبة، السعر المرجعي، السعر).</p>
+      <p class="panel-desc" style="margin-bottom:10px;">يمكنك التعديل مباشرة في أي خانة بالجدول (الاسم، وصف الحالة، النسبة، السعر المرجعي، السعر). لإخفاء عمود بالكامل من الكشف والتصدير، اضغط على علامة × بجانب اسمه في رأس الجدول.</p>
+
+      <div class="columns-toolbar no-export">
+        <span class="ct-label">الأعمدة المخفية من هذا الكشف:</span>
+        <span id="sheetHiddenColsList" style="font-size:12.5px; color:var(--ink-soft);">لا يوجد</span>
+        <button class="btn btn-sm btn-ghost" id="btnResetHiddenCols">إظهار كل الأعمدة</button>
+      </div>
 
       <div class="table-wrap" id="sheetCapture">
-        <div class="sheet-title-heading" id="sheetTitleHeading"></div>
-        <table id="sheetTable">
-          <thead>
-            <tr>
-              <th>الصنف</th>
-              <th style="width:60px;">الفئة</th>
-              <th>وصف الحالة</th>
-              <th style="width:70px;">النسبة</th>
-              <th>الصنف المرجعي</th>
-              <th style="width:110px;">الكود المرجعي</th>
-              <th>السعر المرجعي (ج.م)</th>
-              <th>السعر (ج.م/طن)</th>
-              <th style="width:32px;"></th>
-            </tr>
-          </thead>
+        <div class="export-header">
+          <img class="export-logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7" data-app-logo="1" alt="شعار الأمل الشريف للبلاستيك">
+          <div class="sheet-title-heading" id="sheetTitleHeading"></div>
+          <div class="export-header-spacer"></div>
+        </div>
+        <div class="export-date" id="sheetExportDate"></div>
+        <table id="sheetTable" class="price-sheet-table">
+          <thead id="sheetThead"></thead>
           <tbody id="sheetBody"></tbody>
         </table>
+
+        <div class="committee-section">
+          <div class="committee-title">أعضاء لجنة التسعير</div>
+          <div class="committee-grid" id="sheetCommitteeGrid"></div>
+          <div class="committee-add-row no-export">
+            <input type="text" id="committeeMemberInput" placeholder="اسم عضو اللجنة">
+            <button class="btn btn-sm" id="btnAddCommitteeMember">+ إضافة عضو</button>
+          </div>
+        </div>
+
+        <div class="footer-note">* تم وضع القيم الاسترشادية للخامات(المجروشات) طبقا للاسعار الحالية في السوق وحالة الصنف المعروض للبيع</div>
       </div>
 
       <div class="scope-toggle-row">
@@ -718,26 +832,29 @@ tbody tr:hover{background:var(--panel-2);}
           <button class="btn btn-sm" id="btnPrintRecord">طباعة</button>
           <button class="btn btn-sm" id="btnExportRecordExcel">تصدير Excel</button>
           <button class="btn btn-sm" id="btnExportRecordImage">تصدير صورة</button>
+          <button class="btn btn-sm" id="btnExportRecordPdf">تصدير PDF</button>
+          <button class="btn btn-sm btn-ghost" id="btnEmailRecordPdf" title="تنزيل PDF وفتح Outlook Web لإرساله">✉ إرسال بالإيميل</button>
           <button class="btn btn-sm btn-ghost" id="btnCloseRecordView">إغلاق</button>
         </div>
       </div>
       <div class="table-wrap" id="recordCapture">
-        <div class="sheet-title-heading" id="recordTitleHeading"></div>
-        <table id="recordViewTable">
-          <thead>
-            <tr>
-              <th>الصنف</th>
-              <th style="width:60px;">الفئة</th>
-              <th>وصف الحالة</th>
-              <th style="width:70px;">النسبة</th>
-              <th>الصنف المرجعي</th>
-              <th style="width:110px;">الكود المرجعي</th>
-              <th>السعر المرجعي (ج.م)</th>
-              <th>السعر (ج.م/طن)</th>
-            </tr>
-          </thead>
+        <div class="export-header">
+          <img class="export-logo" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBTAA7" data-app-logo="1" alt="شعار الأمل الشريف للبلاستيك">
+          <div class="sheet-title-heading" id="recordTitleHeading"></div>
+          <div class="export-header-spacer"></div>
+        </div>
+        <div class="export-date" id="recordExportDate"></div>
+        <table id="recordViewTable" class="price-sheet-table">
+          <thead id="recordThead"></thead>
           <tbody id="recordViewBody"></tbody>
         </table>
+
+        <div class="committee-section">
+          <div class="committee-title">أعضاء لجنة التسعير</div>
+          <div class="committee-grid" id="recordCommitteeGrid"></div>
+        </div>
+
+        <div class="footer-note">* تم وضع القيم الاسترشادية للخامات(المجروشات) طبقا للاسعار الحالية في السوق وحالة الصنف المعروض للبيع</div>
       </div>
     </div>
   </section>
@@ -766,6 +883,33 @@ tbody tr:hover{background:var(--panel-2);}
     <div class="modal-actions">
       <button class="btn" id="recordModalCancel">تراجع</button>
       <button class="btn btn-primary" id="recordModalOk">حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="emailModal">
+  <div class="modal modal-wide">
+    <h3>إرسال الكشف بالإيميل</h3>
+    <p>حدد الإيميلات اللي هتتبعت لها الرسالة، واختر صيغة الملف اللي هترفقه بنفسك في نافذة Outlook.</p>
+
+    <div class="email-book-list" id="emailBookList"></div>
+
+    <div class="email-add-row">
+      <input type="text" id="newEmailInput" placeholder="أضف بريدًا إلكترونيًا جديدًا">
+      <label class="email-save-check"><input type="checkbox" id="saveEmailCheck" checked> احفظه في القائمة</label>
+      <button class="btn btn-sm" id="btnAddEmail">+ إضافة</button>
+    </div>
+
+    <div class="email-format-row">
+      <span class="ef-label">صيغة الملف المرفق:</span>
+      <label><input type="radio" name="emailFormat" value="pdf" checked> PDF</label>
+      <label><input type="radio" name="emailFormat" value="image"> صورة</label>
+      <label><input type="radio" name="emailFormat" value="excel"> Excel</label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="emailModalCancel">إلغاء</button>
+      <button class="btn btn-primary" id="emailModalSend">فتح Outlook وإرسال</button>
     </div>
   </div>
 </div>
@@ -803,21 +947,49 @@ async function storeSet(key, value){
   }catch(e){ console.error('localStorage set failed', key, e); return false; }
 }
 
-const KEYS = { items:'items_v3', materials:'materials_v2', records:'records_v2', meta:'meta_v2' };
+const KEYS = { items:'items_v3', materials:'materials_v2', records:'records_v2', meta:'meta_v2', committee:'committee_v1', emailBook:'email_book_v1' };
 
 let STATE = { items: [], materials: [], records: [] };
 let META = { itemsSavedAt: null, materialsSavedAt: null };
+
+/* ---------------- Sheet columns / hidden columns / committee ---------------- */
+const SHEET_COLUMNS = [
+  { key:'code',     label:'كود الصنف',              width:'100px' },
+  { key:'name',     label:'الصنف' },
+  { key:'grade',    label:'الفئة',                 width:'60px' },
+  { key:'cond',     label:'وصف الحالة' },
+  { key:'pct',      label:'النسبة',                 width:'70px' },
+  { key:'rname',    label:'الصنف المرجعي' },
+  { key:'rcode',    label:'الكود المرجعي',          width:'110px' },
+  { key:'refPrice', label:'السعر المرجعي (ج.م)' },
+  { key:'price',    label:'السعر (ج.م/طن)' }
+];
+let HIDDEN_COLS = new Set();
+let COMMITTEE_MEMBERS = [];
+
+/* ---------------- Email address book (for the "send by email" modal) ---------------- */
+let EMAIL_BOOK = [];       // saved addresses, persisted across sessions
+let EMAIL_TEMP = [];       // addresses added for this send only (not persisted)
+let EMAIL_SELECTED = new Set(); // addresses currently checked in the modal
+let EMAIL_CTX = null;      // { captureElId, filenameBase, subjectTitle } for the pending send
+
+function visibleSheetColumns(hidden){
+  const h = hidden || HIDDEN_COLS;
+  return SHEET_COLUMNS.filter(c => !h.has(c.key));
+}
 
 /* ---------------- Boot ---------------- */
 const seedEl = document.getElementById('seed-data');
 const SEED = JSON.parse(seedEl.textContent);
 
 async function boot(){
-  const [items, materials, records, meta] = await Promise.all([
+  const [items, materials, records, meta, committee, emailBook] = await Promise.all([
     storeGet(KEYS.items),
     storeGet(KEYS.materials),
     storeGet(KEYS.records),
-    storeGet(KEYS.meta)
+    storeGet(KEYS.meta),
+    storeGet(KEYS.committee),
+    storeGet(KEYS.emailBook)
   ]);
 
   const restoredFromSave = !!(items || materials);
@@ -826,13 +998,23 @@ async function boot(){
   STATE.materials = materials || SEED.materials.map(m => ({...m}));
   STATE.records = records || [];
   META = meta || META;
+  COMMITTEE_MEMBERS = Array.isArray(committee) ? committee : [];
+  EMAIL_BOOK = Array.isArray(emailBook) ? emailBook : [];
 
   if(!items) await storeSet(KEYS.items, STATE.items);
   if(!materials) await storeSet(KEYS.materials, STATE.materials);
   if(!records) await storeSet(KEYS.records, STATE.records);
 
+  // Sync the exported logo image (base64) onto the sheet/record export headers
+  const headerLogo = document.querySelector('.header-brand img');
+  if(headerLogo){
+    document.querySelectorAll('img[data-app-logo]').forEach(img => { img.src = headerLogo.src; });
+  }
+
   renderAll();
   updateSaveIndicators();
+  renderCommitteeGrid();
+  updateHiddenColsToolbar();
 
   if(restoredFromSave){
     const banner = document.getElementById('restoreBanner');
@@ -1362,7 +1544,7 @@ function buildSheetRows(itemCodes, matCodes){
       const price = (!isNaN(refPrice) && pct !== null && !isNaN(pct)) ? refPrice * pct / 100 : null;
       rows.push({
         itemCode: it.code, classId: cl.id, refMatCode: it.rcode, matCode: null,
-        name: it.name, grade: cl.label || '', cond: cl.cond || '', pct,
+        code: it.code, name: it.name, grade: cl.label || '', cond: cl.cond || '', pct,
         rname: mat ? mat.name : it.rname, rcode: mat ? mat.code : it.rcode,
         refPrice: isNaN(refPrice) ? null : refPrice,
         price, priceOverridden:false
@@ -1385,38 +1567,66 @@ function buildSheetRows(itemCodes, matCodes){
 }
 
 /* Read-only render, used for monthly record view (immutable snapshots) */
-function renderSheetTable(bodyEl, rows){
+/* Builds a <thead> row from the visible-column list.
+   editable=true adds an × button per column (to hide it) plus a trailing blank
+   column for the row-remove button; editable=false (record view) shows plain labels only. */
+function renderTableHead(theadEl, hiddenColsSet, editable, onRemoveCol){
+  const cols = visibleSheetColumns(hiddenColsSet);
+  const ths = cols.map(c => {
+    const widthAttr = c.width ? ` style="width:${c.width};"` : '';
+    const removeBtn = editable ? `<button type="button" class="col-remove-btn no-export" data-colkey="${c.key}" title="إخفاء هذا العمود من الكشف والتصدير نهائيًا">×</button>` : '';
+    return `<th${widthAttr}><span class="col-th-inner">${escapeHtml(c.label)}${removeBtn}</span></th>`;
+  }).join('');
+  const trailingTh = editable ? `<th style="width:32px;" class="no-export"></th>` : '';
+  theadEl.innerHTML = `<tr>${ths}${trailingTh}</tr>`;
+  if(editable){
+    theadEl.querySelectorAll('[data-colkey]').forEach(btn=>{
+      btn.addEventListener('click', ()=> onRemoveCol(btn.dataset.colkey));
+    });
+  }
+}
+
+/* Read-only render, used for monthly record view (immutable snapshots) */
+function renderSheetTable(bodyEl, rows, hiddenColsSet){
+  const cols = visibleSheetColumns(hiddenColsSet);
+  const cellRenderers = {
+    name:     r => escapeHtml(r.name),
+    code:     r => `<span class="code-cell">${escapeHtml(r.code || '—')}</span>`,
+    grade:    r => `<span class="badge ${r.grade==='أ' ? 'a' : (r.grade==='ب' ? 'b':'')}">${escapeHtml(r.grade)}</span>`,
+    cond:     r => escapeHtml(r.cond || '—'),
+    pct:      r => (r.pct !== null && r.pct !== undefined ? r.pct+'%' : '—'),
+    rname:    r => escapeHtml(r.rname),
+    rcode:    r => `<span class="code-cell">${escapeHtml(r.rcode)}</span>`,
+    refPrice: r => fmtMoney(r.refPrice),
+    price:    r => `<strong>${fmtMoney(r.price)}</strong>`
+  };
   bodyEl.innerHTML = rows.map(r => `
     <tr>
-      <td>${escapeHtml(r.name)}</td>
-      <td><span class="badge ${r.grade==='أ' ? 'a' : (r.grade==='ب' ? 'b':'')}">${escapeHtml(r.grade)}</span></td>
-      <td>${escapeHtml(r.cond || '—')}</td>
-      <td>${r.pct !== null && r.pct !== undefined ? r.pct+'%' : '—'}</td>
-      <td>${escapeHtml(r.rname)}</td>
-      <td class="code-cell">${escapeHtml(r.rcode)}</td>
-      <td>${fmtMoney(r.refPrice)}</td>
-      <td><strong>${fmtMoney(r.price)}</strong></td>
+      ${cols.map(c => `<td>${cellRenderers[c.key](r)}</td>`).join('')}
     </tr>
   `).join('');
 }
 
 /* Editable render, used for the live pricing sheet being built */
 function renderSheetTableEditable(){
+  renderTableHead(document.getElementById('sheetThead'), HIDDEN_COLS, true, onSheetColumnRemoved);
+  const cols = visibleSheetColumns(HIDDEN_COLS);
+  const cellEditors = {
+    name:     (r, i) => `<input type="text" class="cell-edit name-edit" data-ridx="${i}" data-field="name" value="${escapeHtml(r.name)}">`,
+    code:     (r, i) => `<span class="code-cell">${escapeHtml(r.code || '—')}</span>`,
+    grade:    (r, i) => r.matCode ? '<span class="badge">—</span>' : `<input type="text" class="cell-edit" style="width:56px; font-weight:800;" data-ridx="${i}" data-field="grade" value="${escapeHtml(r.grade || '')}">`,
+    cond:     (r, i) => `<input type="text" class="cell-edit" data-ridx="${i}" data-field="cond" value="${escapeHtml(r.cond || '')}" placeholder="—">`,
+    pct:      (r, i) => r.matCode ? '100%' : `<input type="number" step="0.1" min="0" max="100" class="cell-edit" data-ridx="${i}" data-field="pct" value="${r.pct ?? ''}">`,
+    rname:    (r, i) => escapeHtml(r.rname),
+    rcode:    (r, i) => `<span class="code-cell">${escapeHtml(r.rcode)}</span>`,
+    refPrice: (r, i) => `<input type="number" step="0.01" class="cell-edit" data-ridx="${i}" data-field="refPrice" value="${r.refPrice ?? ''}">`,
+    price:    (r, i) => `<input type="number" step="0.01" class="cell-edit price-edit ${r.priceOverridden ? 'overridden':''}" data-ridx="${i}" data-field="price" value="${r.price ?? ''}">${r.priceOverridden ? `<button class="reset-price-btn no-export" data-reset="${i}" title="إعادة الحساب تلقائيًا">↺</button>` : ''}`
+  };
   const bodyEl = document.getElementById('sheetBody');
   bodyEl.innerHTML = CURRENT_SHEET.map((r, i) => `
     <tr>
-      <td><input type="text" class="cell-edit name-edit" data-ridx="${i}" data-field="name" value="${escapeHtml(r.name)}"></td>
-      <td>${r.matCode ? '<span class="badge">—</span>' : `<input type="text" class="cell-edit" style="width:56px; font-weight:800;" data-ridx="${i}" data-field="grade" value="${escapeHtml(r.grade || '')}">`}</td>
-      <td><input type="text" class="cell-edit" data-ridx="${i}" data-field="cond" value="${escapeHtml(r.cond || '')}" placeholder="—"></td>
-      <td>${r.matCode ? '100%' : `<input type="number" step="0.1" min="0" max="100" class="cell-edit" data-ridx="${i}" data-field="pct" value="${r.pct ?? ''}">`}</td>
-      <td>${escapeHtml(r.rname)}</td>
-      <td class="code-cell">${escapeHtml(r.rcode)}</td>
-      <td><input type="number" step="0.01" class="cell-edit" data-ridx="${i}" data-field="refPrice" value="${r.refPrice ?? ''}"></td>
-      <td>
-        <input type="number" step="0.01" class="cell-edit price-edit ${r.priceOverridden ? 'overridden':''}" data-ridx="${i}" data-field="price" value="${r.price ?? ''}">
-        ${r.priceOverridden ? `<button class="reset-price-btn" data-reset="${i}" title="إعادة الحساب تلقائيًا">↺</button>` : ''}
-      </td>
-      <td><button class="remove-row-btn" data-removerow="${i}" title="إزالة هذا السطر من الكشف">×</button></td>
+      ${cols.map(c => `<td>${cellEditors[c.key](r, i)}</td>`).join('')}
+      <td class="no-export"><button class="remove-row-btn" data-removerow="${i}" title="إزالة هذا السطر من الكشف">×</button></td>
     </tr>
   `).join('');
 
@@ -1465,6 +1675,70 @@ function renderSheetTableEditable(){
   });
 }
 
+function onSheetColumnRemoved(colKey){
+  HIDDEN_COLS.add(colKey);
+  renderSheetTableEditable();
+  updateHiddenColsToolbar();
+}
+
+function updateHiddenColsToolbar(){
+  const listEl = document.getElementById('sheetHiddenColsList');
+  if(!listEl) return;
+  if(HIDDEN_COLS.size === 0){
+    listEl.textContent = 'لا يوجد';
+  } else {
+    const labels = SHEET_COLUMNS.filter(c => HIDDEN_COLS.has(c.key)).map(c => c.label);
+    listEl.textContent = labels.join('، ');
+  }
+}
+
+document.getElementById('btnResetHiddenCols').addEventListener('click', ()=>{
+  HIDDEN_COLS.clear();
+  renderSheetTableEditable();
+  updateHiddenColsToolbar();
+  toast('تم إظهار كل الأعمدة');
+});
+
+/* ---------------- Pricing committee members ---------------- */
+function committeeCardsHtml(members, editable){
+  if(!members.length){
+    return editable ? '' : `<div class="committee-empty">لم يتم إضافة أعضاء بعد</div>`;
+  }
+  return members.map((name, i) => `
+    <div class="committee-member-card">
+      ${editable ? `<button type="button" class="cm-remove no-export" data-cmremove="${i}" title="إزالة">×</button>` : ''}
+      <div class="cm-name">${escapeHtml(name)}</div>
+      <div class="cm-line">التوقيع</div>
+    </div>
+  `).join('');
+}
+
+function renderCommitteeGrid(){
+  const grid = document.getElementById('sheetCommitteeGrid');
+  if(!grid) return;
+  grid.innerHTML = committeeCardsHtml(COMMITTEE_MEMBERS, true) || `<div class="committee-empty">لم يتم إضافة أعضاء بعد</div>`;
+  grid.querySelectorAll('[data-cmremove]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      COMMITTEE_MEMBERS.splice(Number(btn.dataset.cmremove), 1);
+      await storeSet(KEYS.committee, COMMITTEE_MEMBERS);
+      renderCommitteeGrid();
+    });
+  });
+}
+
+document.getElementById('btnAddCommitteeMember').addEventListener('click', async ()=>{
+  const input = document.getElementById('committeeMemberInput');
+  const name = input.value.trim();
+  if(!name){ toast('اكتب اسم العضو أولًا'); return; }
+  COMMITTEE_MEMBERS.push(name);
+  await storeSet(KEYS.committee, COMMITTEE_MEMBERS);
+  input.value = '';
+  renderCommitteeGrid();
+});
+document.getElementById('committeeMemberInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('btnAddCommitteeMember').click(); }
+});
+
 function recomputeRowPrice(row){
   if(row.refPrice !== null && row.refPrice !== undefined && !isNaN(row.refPrice) && row.pct !== null && row.pct !== undefined && !isNaN(row.pct)){
     row.price = row.refPrice * row.pct / 100;
@@ -1478,18 +1752,28 @@ let CURRENT_SHEET = [];
 function defaultSheetTitle(){
   const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
   const now = new Date();
-  return `تسعير مجروشات عن شهر ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+  return `اسعار استرشادية لخامات مجروشات عن شهر ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+function setExportDate(elId, dateObj){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.textContent = 'تاريخ الإصدار: ' + dateObj.toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' });
 }
 
 document.getElementById('btnBuildSheet').addEventListener('click', ()=>{
   if(SELECTED.size === 0 && SELECTED_MAT.size === 0){ toast('اختر صنفًا أو خامة واحدة على الأقل'); return; }
   CURRENT_SHEET = buildSheetRows(Array.from(SELECTED), Array.from(SELECTED_MAT));
   if(CURRENT_SHEET.length === 0){ toast('الأصناف المحددة ليس لها نسب تصنيف محفوظة بعد'); return; }
+  HIDDEN_COLS = new Set();
+  updateHiddenColsToolbar();
   renderSheetTableEditable();
   document.getElementById('sheetMeta').textContent = `${CURRENT_SHEET.length} سطر — تم الإنشاء بتاريخ ${new Date().toLocaleDateString('ar-EG')}`;
   const titleInput = document.getElementById('sheetTitleInput');
   if(!titleInput.value) titleInput.value = defaultSheetTitle();
   document.getElementById('sheetTitleHeading').textContent = titleInput.value;
+  setExportDate('sheetExportDate', new Date());
+  renderCommitteeGrid();
   renderSummary('sheetSummary', CURRENT_SHEET);
   document.getElementById('sheetPanel').style.display = 'block';
   document.getElementById('sheetPanel').scrollIntoView({behavior:'smooth', block:'start'});
@@ -1553,34 +1837,56 @@ document.getElementById('btnApplySheetEdits').addEventListener('click', async ()
 });
 
 /* ---------------- Export helpers ---------------- */
-function exportToExcelStyled(rows, filename, title){
+function exportToExcelStyled(rows, filename, title, options){
+  options = options || {};
+  const hiddenCols = options.hiddenCols || new Set();
+  const committee = options.committee || [];
+  const logoDataUrl = options.logoDataUrl || null;
+  const cols = visibleSheetColumns(hiddenCols);
+  const colWidths = { name:26, code:14, grade:9, cond:20, pct:10, rname:22, rcode:15, refPrice:18, price:18 };
+
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('كشف التسعير', { views: [{ rightToLeft: true }] });
 
-  const headers = ['الصنف','الفئة','وصف الحالة','النسبة','الصنف المرجعي','الكود المرجعي','السعر المرجعي (ج.م)','السعر (ج.م/طن)'];
-  ws.columns = [
-    {width:30},{width:9},{width:20},{width:10},{width:22},{width:15},{width:18},{width:18}
-  ];
+  const headers = cols.map(c => c.label);
+  ws.columns = cols.map(c => ({ width: colWidths[c.key] || 18 }));
 
-  // Title row
-  ws.mergeCells(1,1,1,headers.length);
-  const titleCell = ws.getCell(1,1);
-  titleCell.value = title || 'كشف تسعير المجروشات';
+  let r = 1;
+
+  // Logo image (top-right corner, i.e. column A in an RTL sheet view)
+  if(logoDataUrl){
+    try{
+      const match = /^data:image\/(png|jpeg|jpg|gif);base64,/.exec(logoDataUrl);
+      if(match){
+        const ext = match[1] === 'jpg' ? 'jpeg' : match[1];
+        const base64 = logoDataUrl.slice(match[0].length);
+        const imgId = wb.addImage({ base64, extension: ext });
+        ws.addImage(imgId, { tl:{ col:0, row:0 }, ext:{ width:70, height:70 } });
+      }
+    }catch(e){ /* logo embedding is best-effort */ }
+  }
+
+  // Title row (merged across all visible columns)
+  ws.mergeCells(r,1,r,headers.length);
+  const titleCell = ws.getCell(r,1);
+  titleCell.value = title || 'اسعار استرشادية لخامات مجروشات';
   titleCell.font = { bold:true, size:16, color:{argb:'FF1B2226'} };
   titleCell.alignment = { horizontal:'center', vertical:'middle' };
   titleCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFFBEADB'} };
-  ws.getRow(1).height = 30;
+  ws.getRow(r).height = 40;
+  r++;
 
   // Sub-line: export date
-  ws.mergeCells(2,1,2,headers.length);
-  const subCell = ws.getCell(2,1);
-  subCell.value = 'تاريخ الإصدار: ' + new Date().toLocaleDateString('ar-EG');
+  ws.mergeCells(r,1,r,headers.length);
+  const subCell = ws.getCell(r,1);
+  subCell.value = 'تاريخ الإصدار: ' + (options.exportDate || new Date()).toLocaleDateString('ar-EG');
   subCell.font = { italic:true, size:10, color:{argb:'FF5B6469'} };
   subCell.alignment = { horizontal:'center' };
-  ws.getRow(2).height = 18;
+  ws.getRow(r).height = 18;
+  r++;
 
   // Header row
-  const headerRowIdx = 3;
+  const headerRowIdx = r;
   const headerRow = ws.getRow(headerRowIdx);
   headers.forEach((h, i)=>{
     const cell = headerRow.getCell(i+1);
@@ -1591,38 +1897,97 @@ function exportToExcelStyled(rows, filename, title){
     cell.border = thinBorder();
   });
   headerRow.height = 22;
+  r++;
 
-  rows.forEach((r, idx)=>{
+  const cellValue = {
+    name: v => v.name,
+    code: v => v.code || '—',
+    grade: v => v.grade,
+    cond: v => v.cond || '—',
+    pct: v => (v.pct !== null && v.pct !== undefined) ? (v.pct/100) : null,
+    rname: v => v.rname,
+    rcode: v => v.rcode,
+    refPrice: v => v.refPrice ?? null,
+    price: v => v.price ?? null
+  };
+
+  rows.forEach((rowData, idx)=>{
     const rowIdx = headerRowIdx + 1 + idx;
     const row = ws.getRow(rowIdx);
-    const values = [
-      r.name, r.grade, r.cond || '—',
-      (r.pct !== null && r.pct !== undefined) ? (r.pct/100) : null,
-      r.rname, r.rcode, r.refPrice ?? null, r.price ?? null
-    ];
-    values.forEach((v, i)=>{
+    cols.forEach((c, i)=>{
       const cell = row.getCell(i+1);
+      const v = cellValue[c.key](rowData);
       cell.value = v;
       cell.alignment = { horizontal:'center', vertical:'middle' };
       cell.border = thinBorder();
-      if(i === 3 && v !== null) cell.numFmt = '0%';
-      if((i === 6 || i === 7) && v !== null) cell.numFmt = '#,##0.00 "ج.م"';
+      if(c.key === 'pct' && v !== null) cell.numFmt = '0%';
+      if((c.key === 'refPrice' || c.key === 'price') && v !== null) cell.numFmt = '#,##0.00 "ج.م"';
       const bandColor = idx % 2 === 0 ? 'FFFFFFFF' : 'FFF5F7F6';
       cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:bandColor} };
+      if(c.key === 'grade'){
+        if(rowData.grade === 'أ'){
+          cell.font = { bold:true, color:{argb:'FF2E6F8E'} };
+          cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE4EFF3'} };
+        } else if(rowData.grade === 'ب'){
+          cell.font = { bold:true, color:{argb:'FF4C7A5E'} };
+          cell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE7F0EA'} };
+        }
+      }
+      if(c.key === 'price') cell.font = { ...(cell.font||{}), bold:true };
     });
-    // grade badge coloring
-    const gradeCell = row.getCell(2);
-    if(r.grade === 'أ'){
-      gradeCell.font = { bold:true, color:{argb:'FF2E6F8E'} };
-      gradeCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE4EFF3'} };
-    } else if(r.grade === 'ب'){
-      gradeCell.font = { bold:true, color:{argb:'FF4C7A5E'} };
-      gradeCell.fill = { type:'pattern', pattern:'solid', fgColor:{argb:'FFE7F0EA'} };
-    }
-    row.getCell(8).font = { bold:true };
+    r = rowIdx + 1;
   });
 
   ws.views = [{ state:'frozen', ySplit: headerRowIdx, rightToLeft:true }];
+
+  // Committee section
+  r += 1;
+  ws.mergeCells(r,1,r,headers.length);
+  const committeeTitleCell = ws.getCell(r,1);
+  committeeTitleCell.value = 'أعضاء لجنة التسعير';
+  committeeTitleCell.font = { bold:true, size:13 };
+  committeeTitleCell.alignment = { horizontal:'center' };
+  r++;
+
+  if(committee.length){
+    // lay members across the available columns, a few per row
+    const perRow = Math.max(1, Math.min(committee.length, headers.length));
+    for(let i = 0; i < committee.length; i += perRow){
+      const chunk = committee.slice(i, i + perRow);
+      const nameRow = ws.getRow(r);
+      const sigRow = ws.getRow(r+1);
+      const span = Math.floor(headers.length / chunk.length) || 1;
+      chunk.forEach((name, ci)=>{
+        const startCol = ci*span + 1;
+        const endCol = ci === chunk.length-1 ? headers.length : startCol + span - 1;
+        ws.mergeCells(r, startCol, r, endCol);
+        const nc = ws.getCell(r, startCol);
+        nc.value = name;
+        nc.font = { bold:true, size:11 };
+        nc.alignment = { horizontal:'center' };
+        ws.mergeCells(r+1, startCol, r+1, endCol);
+        const sc = ws.getCell(r+1, startCol);
+        sc.value = 'التوقيع: ......................';
+        sc.font = { size:9.5, color:{argb:'FF8A9297'} };
+        sc.alignment = { horizontal:'center' };
+      });
+      r += 2;
+    }
+  } else {
+    ws.mergeCells(r,1,r,headers.length);
+    ws.getCell(r,1).value = 'لم يتم إضافة أعضاء';
+    ws.getCell(r,1).alignment = { horizontal:'center' };
+    ws.getCell(r,1).font = { color:{argb:'FF8A9297'}, italic:true };
+    r++;
+  }
+
+  // Fixed footer note
+  r += 1;
+  ws.mergeCells(r,1,r,headers.length);
+  const noteCell = ws.getCell(r,1);
+  noteCell.value = '* تم وضع القيم الاسترشادية للخامات(المجروشات) طبقا للاسعار الحالية في السوق وحالة الصنف المعروض للبيع';
+  noteCell.font = { size:10, color:{argb:'FF4C565B'} };
+  noteCell.alignment = { horizontal:'right', wrapText:true };
 
   wb.xlsx.writeBuffer().then(buffer=>{
     const blob = new Blob([buffer], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
@@ -1637,28 +2002,317 @@ function thinBorder(){
   return { top:s, bottom:s, left:s, right:s };
 }
 
+function getExportedLogoDataUrl(){
+  const img = document.querySelector('img[data-app-logo]');
+  return img ? img.src : null;
+}
+
 function exportToImage(captureElId, filename){
   const el = document.getElementById(captureElId);
+  document.body.classList.add('exporting-capture');
   html2canvas(el, {backgroundColor:'#ffffff', scale:2}).then(canvas=>{
+    document.body.classList.remove('exporting-capture');
     const link = document.createElement('a');
     link.download = filename + '.png';
     link.href = canvas.toDataURL('image/png');
     link.click();
+  }).catch(err=>{
+    document.body.classList.remove('exporting-capture');
+    console.error('image export failed', err);
   });
 }
 
 document.getElementById('btnExportExcel').addEventListener('click', ()=>{
   if(!CURRENT_SHEET.length) return;
   const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
-  exportToExcelStyled(CURRENT_SHEET, 'كشف_تسعير_المجروشات', title);
+  exportToExcelStyled(CURRENT_SHEET, 'كشف_تسعير_المجروشات', title, {
+    hiddenCols: HIDDEN_COLS, committee: COMMITTEE_MEMBERS, logoDataUrl: getExportedLogoDataUrl(), exportDate: new Date()
+  });
   toast('تم تصدير ملف Excel');
 });
 document.getElementById('btnExportImage').addEventListener('click', ()=>{
   if(!CURRENT_SHEET.length) return;
+  setExportDate('sheetExportDate', new Date());
   exportToImage('sheetCapture', 'كشف_تسعير_المجروشات');
   toast('جارٍ تنزيل الصورة…');
 });
-document.getElementById('btnPrintSheet').addEventListener('click', ()=> window.print());
+document.getElementById('btnPrintSheet').addEventListener('click', ()=>{
+  setExportDate('sheetExportDate', new Date());
+  window.print();
+});
+
+/* ---------------- PDF export ----------------
+   Renders the capture div (letterhead + table + committee + note) to a canvas,
+   then slices it across A4 pages WITHOUT cutting through a table row: the cut
+   point for every page is snapped back to the nearest safe boundary (end of a
+   table row, or before the committee/footer blocks). The logo+title letterhead
+   is repeated at the top of every continuation page so the report reads as one
+   consistent branded document even when it spans several pages. */
+async function exportToPDF(captureElId, filename){
+  if(typeof window.jspdf === 'undefined'){ toast('تعذر تحميل مكتبة PDF، تحقق من الاتصال بالإنترنت'); return; }
+  const container = document.getElementById(captureElId);
+  document.body.classList.add('exporting-capture');
+  try{
+    const scale = 2;
+    const canvas = await html2canvas(container, {backgroundColor:'#ffffff', scale});
+    const containerRect = container.getBoundingClientRect();
+
+    // Collect safe cut points (CSS px relative to the container's top), then convert to canvas px
+    const cutSetCss = new Set();
+    container.querySelectorAll('table tr').forEach(tr=>{
+      cutSetCss.add(tr.getBoundingClientRect().bottom - containerRect.top);
+    });
+    const committeeSection = container.querySelector('.committee-section');
+    if(committeeSection) cutSetCss.add(committeeSection.getBoundingClientRect().top - containerRect.top);
+    container.querySelectorAll('.committee-member-card').forEach(card=>{
+      cutSetCss.add(card.getBoundingClientRect().bottom - containerRect.top);
+    });
+    const footerNote = container.querySelector('.footer-note');
+    if(footerNote){
+      cutSetCss.add(footerNote.getBoundingClientRect().top - containerRect.top);
+      cutSetCss.add(footerNote.getBoundingClientRect().bottom - containerRect.top);
+    }
+    cutSetCss.add(containerRect.height);
+
+    const cutPoints = Array.from(cutSetCss)
+      .map(v => Math.round(v * scale))
+      .filter(v => v >= 0 && v <= canvas.height)
+      .sort((a,b)=>a-b);
+
+    const headerEl = container.querySelector('.export-header');
+    const headerHeightPx = headerEl ? Math.round(headerEl.getBoundingClientRect().height * scale) : 0;
+    let headerCanvasDataUrl = null;
+    if(headerHeightPx > 0){
+      const hc = document.createElement('canvas');
+      hc.width = canvas.width; hc.height = headerHeightPx;
+      hc.getContext('2d').drawImage(canvas, 0, 0, canvas.width, headerHeightPx, 0, 0, canvas.width, headerHeightPx);
+      headerCanvasDataUrl = hc.toDataURL('image/png');
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'mm', format:'a4' });
+    const pageWidthMM = doc.internal.pageSize.getWidth();
+    const pageHeightMM = doc.internal.pageSize.getHeight();
+    const marginMM = 10;
+    const contentWidthMM = pageWidthMM - marginMM*2;
+    const scaleFactor = contentWidthMM / canvas.width; // mm per canvas px
+    const headerHeightMM = headerHeightPx * scaleFactor;
+
+    let currentY = 0;
+    let pageIndex = 0;
+    const maxPages = 60; // safety guard against any pathological infinite loop
+
+    while(currentY < canvas.height - 1 && pageIndex < maxPages){
+      if(pageIndex > 0) doc.addPage();
+      let cursorMM = marginMM;
+      if(pageIndex > 0 && headerCanvasDataUrl){
+        doc.addImage(headerCanvasDataUrl, 'PNG', marginMM, cursorMM, contentWidthMM, headerHeightMM);
+        cursorMM += headerHeightMM + 2;
+      }
+      const availableMM = pageHeightMM - cursorMM - marginMM;
+      const availablePx = Math.max(1, availableMM / scaleFactor);
+      const idealEnd = currentY + availablePx;
+
+      let cut = null;
+      for(const cp of cutPoints){
+        if(cp > currentY && cp <= idealEnd) cut = cp;
+        if(cp > idealEnd) break;
+      }
+      if(cut === null || cut <= currentY){
+        cut = Math.min(currentY + availablePx, canvas.height);
+      }
+
+      const sliceHeightPx = Math.max(1, Math.round(cut - currentY));
+      const sliceCanvas = document.createElement('canvas');
+      sliceCanvas.width = canvas.width;
+      sliceCanvas.height = sliceHeightPx;
+      sliceCanvas.getContext('2d').drawImage(canvas, 0, currentY, canvas.width, sliceHeightPx, 0, 0, canvas.width, sliceHeightPx);
+      const sliceHeightMM = sliceHeightPx * scaleFactor;
+      doc.addImage(sliceCanvas.toDataURL('image/png'), 'PNG', marginMM, cursorMM, contentWidthMM, sliceHeightMM);
+
+      currentY = cut;
+      pageIndex++;
+    }
+
+    if(pageIndex > 1){
+      for(let p=1; p<=pageIndex; p++){
+        doc.setPage(p);
+        doc.setFontSize(8.5);
+        doc.setTextColor(140,146,151);
+        doc.text(`${p} / ${pageIndex}`, pageWidthMM/2, pageHeightMM - 5, {align:'center'});
+      }
+    }
+
+    doc.save(filename + '.pdf');
+    return filename + '.pdf';
+  } catch(err){
+    console.error('pdf export failed', err);
+    toast('حدث خطأ أثناء تصدير PDF');
+    return null;
+  } finally {
+    document.body.classList.remove('exporting-capture');
+  }
+}
+
+/* ---------------- "Send by email" modal (Outlook Web compose) ----------------
+   IMPORTANT LIMITATION: no browser lets a web page attach a local file to a webmail
+   compose window automatically (this applies to Outlook Web, Gmail, Yahoo, etc. — it's
+   a security restriction, not something specific to this app). So the chosen file format
+   is downloaded first, and the person attaches that downloaded file inside the Outlook
+   tab that opens (drag & drop, or the paperclip button), then presses Send there. */
+function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+function renderEmailBook(){
+  const list = document.getElementById('emailBookList');
+  if(!list) return;
+  const rows = [];
+  EMAIL_BOOK.forEach(email=>{
+    const checked = EMAIL_SELECTED.has(email) ? 'checked' : '';
+    rows.push(`<div class="email-row"><input type="checkbox" class="email-check" data-email="${escapeHtml(email)}" ${checked}><span class="er-email">${escapeHtml(email)}</span><button type="button" class="er-remove" data-emailremove="${escapeHtml(email)}" title="حذف نهائي من القائمة">×</button></div>`);
+  });
+  EMAIL_TEMP.forEach(email=>{
+    const checked = EMAIL_SELECTED.has(email) ? 'checked' : '';
+    rows.push(`<div class="email-row"><input type="checkbox" class="email-check" data-email="${escapeHtml(email)}" ${checked}><span class="er-email">${escapeHtml(email)}</span><span class="er-tag">(غير محفوظ)</span><button type="button" class="er-remove" data-emailremovetemp="${escapeHtml(email)}" title="إزالة">×</button></div>`);
+  });
+  list.innerHTML = rows.length ? rows.join('') : `<div class="email-empty">لا يوجد إيميلات محفوظة بعد — أضف واحدًا تحت</div>`;
+
+  list.querySelectorAll('.email-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) EMAIL_SELECTED.add(cb.dataset.email);
+      else EMAIL_SELECTED.delete(cb.dataset.email);
+    });
+  });
+  list.querySelectorAll('[data-emailremove]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const email = btn.dataset.emailremove;
+      EMAIL_BOOK = EMAIL_BOOK.filter(e=>e!==email);
+      EMAIL_SELECTED.delete(email);
+      await storeSet(KEYS.emailBook, EMAIL_BOOK);
+      renderEmailBook();
+    });
+  });
+  list.querySelectorAll('[data-emailremovetemp]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const email = btn.dataset.emailremovetemp;
+      EMAIL_TEMP = EMAIL_TEMP.filter(e=>e!==email);
+      EMAIL_SELECTED.delete(email);
+      renderEmailBook();
+    });
+  });
+}
+
+document.getElementById('btnAddEmail').addEventListener('click', async ()=>{
+  const input = document.getElementById('newEmailInput');
+  const email = input.value.trim();
+  if(!email){ toast('اكتب إيميل أولًا'); return; }
+  if(!isValidEmail(email)){ toast('صيغة الإيميل غير صحيحة'); return; }
+  if(EMAIL_BOOK.includes(email) || EMAIL_TEMP.includes(email)){
+    EMAIL_SELECTED.add(email);
+    input.value = '';
+    renderEmailBook();
+    return;
+  }
+  const save = document.getElementById('saveEmailCheck').checked;
+  if(save){
+    EMAIL_BOOK.push(email);
+    await storeSet(KEYS.emailBook, EMAIL_BOOK);
+  } else {
+    EMAIL_TEMP.push(email);
+  }
+  EMAIL_SELECTED.add(email);
+  input.value = '';
+  renderEmailBook();
+});
+document.getElementById('newEmailInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('btnAddEmail').click(); }
+});
+
+function openEmailModal(captureElId, filenameBase, subjectTitle){
+  EMAIL_CTX = { captureElId, filenameBase, subjectTitle };
+  EMAIL_TEMP = [];
+  EMAIL_SELECTED = new Set(EMAIL_BOOK); // saved addresses are pre-checked by default
+  renderEmailBook();
+  document.getElementById('emailModal').classList.add('show');
+}
+document.getElementById('emailModalCancel').addEventListener('click', ()=>{
+  document.getElementById('emailModal').classList.remove('show');
+});
+
+/* Pulls "شهر ..." out of the sheet's own title when possible, so the email always
+   names the month the report is actually for (falls back to the current month). */
+function monthYearFromTitle(title){
+  if(title){
+    const m = title.match(/عن شهر\s+(.+)$/);
+    if(m) return m[1].trim();
+  }
+  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const now = new Date();
+  return `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+document.getElementById('emailModalSend').addEventListener('click', async ()=>{
+  if(!EMAIL_CTX) return;
+  const { captureElId, filenameBase, subjectTitle } = EMAIL_CTX;
+  const format = document.querySelector('input[name="emailFormat"]:checked').value;
+  const dateElId = captureElId === 'sheetCapture' ? 'sheetExportDate' : 'recordExportDate';
+
+  let savedFile = null;
+  if(format === 'pdf'){
+    setExportDate(dateElId, new Date());
+    savedFile = await exportToPDF(captureElId, filenameBase);
+  } else if(format === 'image'){
+    setExportDate(dateElId, new Date());
+    exportToImage(captureElId, filenameBase);
+    savedFile = filenameBase + '.png';
+  } else if(format === 'excel'){
+    if(captureElId === 'sheetCapture'){
+      const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
+      exportToExcelStyled(CURRENT_SHEET, filenameBase, title, {
+        hiddenCols: HIDDEN_COLS, committee: COMMITTEE_MEMBERS, logoDataUrl: getExportedLogoDataUrl(), exportDate: new Date()
+      });
+    } else if(ACTIVE_RECORD){
+      exportToExcelStyled(ACTIVE_RECORD.rows, filenameBase, ACTIVE_RECORD.title || ACTIVE_RECORD.label, {
+        hiddenCols: new Set(ACTIVE_RECORD.hiddenCols || []), committee: ACTIVE_RECORD.committee || [],
+        logoDataUrl: getExportedLogoDataUrl(), exportDate: new Date(ACTIVE_RECORD.date)
+      });
+    }
+    savedFile = filenameBase + '.xlsx';
+  }
+
+  /* Outlook Web's "body" deeplink parameter only accepts plain text — any HTML tags
+     we pass (like <b> or <div>) get inserted literally instead of being rendered, so
+     bold/font-size can't be set through the link itself. We send clean plain text with
+     proper line breaks instead; the person can select the greeting/closing lines and
+     press Ctrl+B in Outlook afterwards if they want them bold. */
+  const monthYear = monthYearFromTitle(subjectTitle);
+  const subject = subjectTitle || 'كشف تسعير المجروشات';
+  const body =
+    `السادة الزملاء\n` +
+    `تحية طيبة وبعد....\n\n` +
+    `مرفق الي سيادتكم ملف الاسعار الاسترشادية عن شهر ${monthYear}\n\n` +
+    `ولكم خالص الشكر والتقدير`;
+
+  const to = Array.from(EMAIL_SELECTED).join(',');
+  const outlookComposeUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(outlookComposeUrl, '_blank');
+  document.getElementById('emailModal').classList.remove('show');
+  toast(savedFile ? `تم تنزيل ${savedFile} — أرفقه في نافذة Outlook قبل الإرسال` : 'افتح Outlook وأرفق الملف يدويًا');
+});
+
+document.getElementById('btnExportPdf').addEventListener('click', ()=>{
+  if(!CURRENT_SHEET.length) return;
+  const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
+  setExportDate('sheetExportDate', new Date());
+  toast('جارٍ تجهيز PDF…');
+  exportToPDF('sheetCapture', 'كشف_تسعير_المجروشات').then(saved=>{
+    if(saved) toast('تم تصدير ملف PDF');
+  });
+});
+document.getElementById('btnEmailPdf').addEventListener('click', ()=>{
+  if(!CURRENT_SHEET.length) return;
+  const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
+  openEmailModal('sheetCapture', 'كشف_تسعير_المجروشات', title);
+});
 
 /* ---------------- Monthly records ---------------- */
 document.getElementById('btnSaveRecord').addEventListener('click', ()=>{
@@ -1677,7 +2331,9 @@ document.getElementById('recordModalOk').addEventListener('click', async ()=>{
     label,
     title: label,
     date: new Date().toISOString(),
-    rows: CURRENT_SHEET
+    rows: CURRENT_SHEET,
+    hiddenCols: Array.from(HIDDEN_COLS),
+    committee: [...COMMITTEE_MEMBERS]
   };
   STATE.records.unshift(record);
   await storeSet(KEYS.records, STATE.records);
@@ -1731,10 +2387,15 @@ function openRecordView(id){
   const rec = STATE.records.find(r=>r.id === id);
   if(!rec) return;
   ACTIVE_RECORD = rec;
+  const recHiddenCols = new Set(rec.hiddenCols || []);
+  const recCommittee = rec.committee || [];
   document.getElementById('recordViewTitle').textContent = rec.label;
   document.getElementById('recordViewMeta').textContent = `${new Date(rec.date).toLocaleString('ar-EG')} — ${rec.rows.length} سطر`;
   document.getElementById('recordTitleHeading').textContent = rec.title || rec.label;
-  renderSheetTable(document.getElementById('recordViewBody'), rec.rows);
+  setExportDate('recordExportDate', new Date(rec.date));
+  renderTableHead(document.getElementById('recordThead'), recHiddenCols, false, null);
+  renderSheetTable(document.getElementById('recordViewBody'), rec.rows, recHiddenCols);
+  document.getElementById('recordCommitteeGrid').innerHTML = committeeCardsHtml(recCommittee, false);
   document.getElementById('recordViewPanel').style.display = 'block';
   document.getElementById('recordViewPanel').scrollIntoView({behavior:'smooth', block:'start'});
 }
@@ -1743,13 +2404,29 @@ document.getElementById('btnCloseRecordView').addEventListener('click', ()=>{
 });
 document.getElementById('btnExportRecordExcel').addEventListener('click', ()=>{
   if(!ACTIVE_RECORD) return;
-  exportToExcelStyled(ACTIVE_RECORD.rows, ACTIVE_RECORD.label.replace(/\s+/g,'_'), ACTIVE_RECORD.title || ACTIVE_RECORD.label);
+  exportToExcelStyled(ACTIVE_RECORD.rows, ACTIVE_RECORD.label.replace(/\s+/g,'_'), ACTIVE_RECORD.title || ACTIVE_RECORD.label, {
+    hiddenCols: new Set(ACTIVE_RECORD.hiddenCols || []),
+    committee: ACTIVE_RECORD.committee || [],
+    logoDataUrl: getExportedLogoDataUrl(),
+    exportDate: new Date(ACTIVE_RECORD.date)
+  });
   toast('تم تصدير ملف Excel');
 });
 document.getElementById('btnExportRecordImage').addEventListener('click', ()=>{
   if(!ACTIVE_RECORD) return;
   exportToImage('recordCapture', ACTIVE_RECORD.label.replace(/\s+/g,'_'));
   toast('جارٍ تنزيل الصورة…');
+});
+document.getElementById('btnExportRecordPdf').addEventListener('click', ()=>{
+  if(!ACTIVE_RECORD) return;
+  toast('جارٍ تجهيز PDF…');
+  exportToPDF('recordCapture', ACTIVE_RECORD.label.replace(/\s+/g,'_')).then(saved=>{
+    if(saved) toast('تم تصدير ملف PDF');
+  });
+});
+document.getElementById('btnEmailRecordPdf').addEventListener('click', ()=>{
+  if(!ACTIVE_RECORD) return;
+  openEmailModal('recordCapture', ACTIVE_RECORD.label.replace(/\s+/g,'_'), ACTIVE_RECORD.title || ACTIVE_RECORD.label);
 });
 document.getElementById('btnPrintRecord').addEventListener('click', ()=> window.print());
 
@@ -1812,7 +2489,8 @@ document.getElementById('btnBackupExport').addEventListener('click', ()=>{
     exportedAt: new Date().toISOString(),
     items: STATE.items,
     materials: STATE.materials,
-    records: STATE.records
+    records: STATE.records,
+    committee: COMMITTEE_MEMBERS
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], {type:'application/json'});
   const url = URL.createObjectURL(blob);
@@ -1844,14 +2522,17 @@ document.getElementById('backupFileInput').addEventListener('change', (e)=>{
         STATE.items = data.items;
         STATE.materials = data.materials;
         STATE.records = data.records || [];
+        COMMITTEE_MEMBERS = Array.isArray(data.committee) ? data.committee : COMMITTEE_MEMBERS;
         await storeSet(KEYS.items, STATE.items);
         await storeSet(KEYS.materials, STATE.materials);
         await storeSet(KEYS.records, STATE.records);
+        await storeSet(KEYS.committee, COMMITTEE_MEMBERS);
         META.itemsSavedAt = new Date().toISOString();
         META.materialsSavedAt = new Date().toISOString();
         await storeSet(KEYS.meta, META);
         renderAll();
         updateSaveIndicators();
+        renderCommitteeGrid();
         toast('تم استرجاع النسخة الاحتياطية بنجاح');
       }
     );

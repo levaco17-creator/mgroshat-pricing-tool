@@ -266,6 +266,28 @@ tbody tr:hover{background:var(--panel-2);}
 .modal p{margin:0 0 14px; font-size:13px; color:var(--ink-soft);}
 .modal-actions{display:flex; gap:10px; justify-content:flex-end; margin-top:16px;}
 
+/* ---------- Email modal ---------- */
+.modal-wide{max-width:480px;}
+.email-book-list{
+  max-height:170px; overflow-y:auto; border:1px solid var(--line); border-radius:var(--radius-s);
+  padding:8px 10px; margin-bottom:12px; display:flex; flex-direction:column; gap:7px;
+}
+.email-row{display:flex; align-items:center; gap:8px; font-size:13px;}
+.email-row .er-email{flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+.email-row .er-tag{font-size:10.5px; color:var(--muted); white-space:nowrap;}
+.email-row .er-remove{border:none; background:none; color:var(--muted); cursor:pointer; font-size:14px; flex-shrink:0;}
+.email-row .er-remove:hover{color:var(--danger);}
+.email-empty{font-size:12.5px; color:var(--muted); text-align:center; padding:8px 4px;}
+.email-add-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+.email-add-row input[type=text]{
+  flex:1; min-width:170px; padding:8px 10px; border:1px solid var(--line-strong);
+  border-radius:var(--radius-s); font-size:13px;
+}
+.email-save-check{font-size:12px; color:var(--ink-soft); display:flex; align-items:center; gap:4px; white-space:nowrap;}
+.email-format-row{display:flex; align-items:center; gap:14px; flex-wrap:wrap; font-size:13px; margin-bottom:2px;}
+.email-format-row label{display:flex; align-items:center; gap:5px;}
+.email-format-row .ef-label{font-weight:700; color:var(--ink-soft); font-size:12.5px;}
+
 @media (max-width:640px){
   .app-header{flex-direction:column; align-items:flex-start;}
   .header-stats{gap:16px;}
@@ -399,6 +421,25 @@ tbody tr:hover{background:var(--panel-2);}
 .sheet-title-heading{
   text-align:center; font-size:19px; font-weight:900; padding:0; color:var(--ink);
 }
+
+.export-date{
+  text-align:center; font-size:11.5px; color:var(--ink-soft); margin:2px 0 14px; font-weight:600;
+}
+
+/* Fully-ruled grid for the exported price table (vertical + horizontal lines) */
+.price-sheet-table{border:1px solid var(--line-strong);}
+.price-sheet-table thead th{
+  border:1px solid var(--line-strong); border-top:none;
+}
+.price-sheet-table thead th:first-child{border-right:none;}
+.price-sheet-table thead th:last-child{border-left:none;}
+.price-sheet-table tbody td{
+  border:1px solid var(--line-strong);
+}
+.price-sheet-table tbody td:first-child{border-right:none;}
+.price-sheet-table tbody td:last-child{border-left:none;}
+.price-sheet-table tbody tr:last-child td{border-bottom:none;}
+.price-sheet-table tbody tr:nth-child(even){background:var(--panel-2);}
 
 /* ---------- Item code shown under the name (no extra column) ---------- */
 .item-code-tag{font-size:11px; color:var(--muted); font-weight:600; margin-top:2px;}
@@ -713,7 +754,7 @@ body.exporting-capture .no-export{display:none !important;}
           <button class="btn btn-sm" id="btnExportExcel">تصدير Excel</button>
           <button class="btn btn-sm" id="btnExportImage">تصدير صورة</button>
           <button class="btn btn-sm" id="btnExportPdf">تصدير PDF</button>
-          <button class="btn btn-sm btn-ghost" id="btnEmailPdf" title="تنزيل PDF وفتح تطبيق البريد لإرساله">✉ إرسال بالإيميل</button>
+          <button class="btn btn-sm btn-ghost" id="btnEmailPdf" title="تنزيل PDF وفتح Outlook Web لإرساله">✉ إرسال بالإيميل</button>
           <button class="btn btn-sm btn-primary" id="btnSaveRecord">حفظ كسجل شهري</button>
         </div>
       </div>
@@ -739,7 +780,8 @@ body.exporting-capture .no-export{display:none !important;}
           <div class="sheet-title-heading" id="sheetTitleHeading"></div>
           <div class="export-header-spacer"></div>
         </div>
-        <table id="sheetTable">
+        <div class="export-date" id="sheetExportDate"></div>
+        <table id="sheetTable" class="price-sheet-table">
           <thead id="sheetThead"></thead>
           <tbody id="sheetBody"></tbody>
         </table>
@@ -791,7 +833,7 @@ body.exporting-capture .no-export{display:none !important;}
           <button class="btn btn-sm" id="btnExportRecordExcel">تصدير Excel</button>
           <button class="btn btn-sm" id="btnExportRecordImage">تصدير صورة</button>
           <button class="btn btn-sm" id="btnExportRecordPdf">تصدير PDF</button>
-          <button class="btn btn-sm btn-ghost" id="btnEmailRecordPdf" title="تنزيل PDF وفتح تطبيق البريد لإرساله">✉ إرسال بالإيميل</button>
+          <button class="btn btn-sm btn-ghost" id="btnEmailRecordPdf" title="تنزيل PDF وفتح Outlook Web لإرساله">✉ إرسال بالإيميل</button>
           <button class="btn btn-sm btn-ghost" id="btnCloseRecordView">إغلاق</button>
         </div>
       </div>
@@ -801,7 +843,8 @@ body.exporting-capture .no-export{display:none !important;}
           <div class="sheet-title-heading" id="recordTitleHeading"></div>
           <div class="export-header-spacer"></div>
         </div>
-        <table id="recordViewTable">
+        <div class="export-date" id="recordExportDate"></div>
+        <table id="recordViewTable" class="price-sheet-table">
           <thead id="recordThead"></thead>
           <tbody id="recordViewBody"></tbody>
         </table>
@@ -844,6 +887,33 @@ body.exporting-capture .no-export{display:none !important;}
   </div>
 </div>
 
+<div class="modal-backdrop" id="emailModal">
+  <div class="modal modal-wide">
+    <h3>إرسال الكشف بالإيميل</h3>
+    <p>حدد الإيميلات اللي هتتبعت لها الرسالة، واختر صيغة الملف اللي هترفقه بنفسك في نافذة Outlook.</p>
+
+    <div class="email-book-list" id="emailBookList"></div>
+
+    <div class="email-add-row">
+      <input type="text" id="newEmailInput" placeholder="أضف بريدًا إلكترونيًا جديدًا">
+      <label class="email-save-check"><input type="checkbox" id="saveEmailCheck" checked> احفظه في القائمة</label>
+      <button class="btn btn-sm" id="btnAddEmail">+ إضافة</button>
+    </div>
+
+    <div class="email-format-row">
+      <span class="ef-label">صيغة الملف المرفق:</span>
+      <label><input type="radio" name="emailFormat" value="pdf" checked> PDF</label>
+      <label><input type="radio" name="emailFormat" value="image"> صورة</label>
+      <label><input type="radio" name="emailFormat" value="excel"> Excel</label>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="emailModalCancel">إلغاء</button>
+      <button class="btn btn-primary" id="emailModalSend">فتح Outlook وإرسال</button>
+    </div>
+  </div>
+</div>
+
 <script id="seed-data" type="application/json">{"items": [{"code": "PL0001", "name": "مجروش مواسير رمادي وبرتقال", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0002", "name": "مجروش مواسير أسود (غامق)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0003", "name": "مجروش مواسير حشو", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0004", "name": "مجروش مواسير لون CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0005", "name": "مجروش PE ملون", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0006", "name": "مجروش PE أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0007", "name": "مجروش PPR خط أصفر", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0008", "name": "مجروش PPR خط أزرق", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0009", "name": "مجروش PPR حشو أحمر", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0010", "name": "مجروش PPR معزول أسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0011", "name": "مجروش PPH رمادي خفيف", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0012", "name": "مجروش PPH رمادي ثقيل", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0013", "name": "مجروش CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0014", "name": "مجروش وصلات PP اسود", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0015", "name": "مجروش وصلات PP ملون", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0016", "name": "مجروش بولي اسيتال", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0017", "name": "مجروش بولي اميد", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0018", "name": "مجروش TPE أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0019", "name": "مجروش وصلات PVC أبيض", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0020", "name": "مجروش أبيض طري", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0021", "name": "مجروش وصلات PVC رمادي", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0022", "name": "مجروش وصلات PVC أسود", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0023", "name": "مجروش فيلم", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0024", "name": "كنسة رزن", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0025", "name": "كنسة بودرة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0026", "name": "كنسة أوميا", "rcode": "RFI100001", "rname": "CaCO3 10 micron", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0027", "name": "حبيبات وصلات PVC أبيض", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0028", "name": "حبيبات وصلات PVC غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0029", "name": "كنسة حبيبات PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0030", "name": "كنسة حبيبات PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0031", "name": "كنسة حبيبات PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0032", "name": "كنسة مجروش", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0033", "name": "كنسة مجروش PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0034", "name": "كنسة حبيبات مخلطة", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0035", "name": "كنسة كسارة وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0036", "name": "كنسة كسارة مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0037", "name": "بودرة بيارة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0038", "name": "هايش منشار مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0039", "name": "هايش مخارط وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0040", "name": "كتل PVC وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0041", "name": "كتل PPR أخضر", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0042", "name": "كتل PPR ملونة", "rcode": "RPR100001", "rname": "PPR-N", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0043", "name": "كتل PVC مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0044", "name": "كتل PE مواسير ملونة", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0045", "name": "كتل PE مواسير أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0046", "name": "كتل تنظيف مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0047", "name": "كتل PVC محروقة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0048", "name": "كتل PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0049", "name": "كتل CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0050", "name": "زوائد كاوتش", "rcode": "RRU100001", "rname": "NR", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0051", "name": "كتل كاوتش", "rcode": "RRU100001", "rname": "NR", "src": "bulletin_2024_10", "classifications": []}, {"code": "PL0052", "name": "طبالي بلاستيك", "rcode": "RPE100005", "rname": "black PE 100", "src": "bulletin_2024_10", "classifications": []}, {"code": "WFS000206", "name": "مجروش ابيض طرى PVC", "rcode": "RPV100003", "rname": "S-PVC 70", "src": "master", "classifications": []}, {"code": "WFS000212", "name": "مجروش وصلات PP - غامق 1753", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000220", "name": "مجروش PPR اخضر", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000223", "name": "مجروش وصلات احمر PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000224", "name": "مجروش وصلات اسود ضغط", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000231", "name": "مجروش وصلات ساخنC.P.V.C معالج", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000233", "name": "مجروش وصلات P.E أسود 100", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000202", "name": "مجروش وصلات ازرق PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000209", "name": "مجروش وصلات P.E أسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000218", "name": "مجروش ابيض( أ)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000240", "name": "مجروش أحمر وصلات P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000203", "name": "مجروش وصلات اخضر PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000205", "name": "مجروش وصلات رمادى", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000234", "name": "مجروش وصلات P.E أصفر 80", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000237", "name": "مجروش وصلات ازرق PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000238", "name": "مجروش وصلات PPH برتقالي", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFS000241", "name": "زوائد وتحت التكسير ابيض تشغيل خارجي", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000201", "name": "مجروش وصلات حلقة صفراء TPE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000216", "name": "مجروش اسود PP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000227", "name": "مجروش P.P.R أبيض", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000228", "name": "مجروش وصلات P.P.R HOFFEN", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000230", "name": "مجروش وصلات حلقة صفراء TPE 20%", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000232", "name": "مجروش PA بولى امايد رمادي", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000301", "name": "مجروش فيلم LD - PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000207", "name": "مجروش اسود طرى PVC", "rcode": "RPV100003", "rname": "S-PVC 70", "src": "master", "classifications": []}, {"code": "WFS000208", "name": "مجروش وصلات اسود TPE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000213", "name": "مجروش وصلات PPH - فاتح 1755", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFS000217", "name": "مجروش وصلات PP-R - OD", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000225", "name": "مجروش وصلات PP اسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000229", "name": "مجروش وصلات APS", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000239", "name": "مجروش رمادي وصلات P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000215", "name": "مجروش حشو وصلاتPP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000222", "name": "مجروش بولى اسيتال ازرق", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000204", "name": "مجروش وصلات مخلط PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000210", "name": "مجروش ابيض وصلات P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000211", "name": "مجروش P.E مكسر", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFS000214", "name": "مجروش وصلات رمادى ساخنC.P.V.C", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFS000219", "name": "مجروش حلقة حمراء", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000221", "name": "مجروش وصلات ابيض PP", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFS000226", "name": "مجروش PA بولى امايد", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000128", "name": "مجروش حشو مصبوغ ازرق", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000130", "name": "مجروش رمادى مصبوغ ازرق", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000137", "name": "مجروش مواسير رمادي بارد", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000141", "name": "مجروش PPR خط ازرق", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000142", "name": "مجروش PPR خط احمر", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000111", "name": "مجروش مصبوغ فاتح حشو", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000113", "name": "مجروش مواسير مطحون برتقالي حشو", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000117", "name": "مجروش PPRاسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000118", "name": "مجروش حشو احمر PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WPS000135", "name": "مجروش مواسير CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WPS000149", "name": "مجروش اسود PE (ب)", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000128", "name": "هايش ( مخارط ) منشار وصلات", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000143", "name": "كتل PP-H", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000146", "name": "كتل فيلم", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000151", "name": "مادة لاصقة تالفة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000158", "name": "كنسه كساره مواسير (ا)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000168", "name": "مجروش اسود مخرز PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000173", "name": "مطحون رمادي مصبوغ ازرق غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000174", "name": "مطحون مخلط مصبوغ ازرق غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000181", "name": "هايش منشار PE إسود", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000190", "name": "خامة جنراتو محون تالف", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000196", "name": "مجروش وصلات رمادي ضغط غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000203", "name": "كتل مواسير ألوان ب", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000114", "name": "كنسة ريزن", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000116", "name": "كتل مواسير بيضاء", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000129", "name": "كنسة بودرة وصلات ملوث", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000130", "name": "كنسة حبيبات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000145", "name": "حبيبات وصلات ابيض غير صالحة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000149", "name": "كتل برتقالى مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000159", "name": "كنسه كساره مواسير (ب)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000172", "name": "كنسة اوميا", "rcode": "RFI100002", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000177", "name": "مطحون ابيض مصبوغ ازرق غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000184", "name": "كتل هوفن PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000188", "name": "كنسه ريزن (ا)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000211", "name": "ماسترباتش أحمر P V C غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000213", "name": "بودره تيفلون 807 ( وصلات ) غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000217", "name": "مجروش رمادي وصلات (ب)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000220", "name": "مجروش PE برتقالي د/ث", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000131", "name": "هبو مجروش", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000132", "name": "كتل تنظيف وصلات", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000140", "name": "كتل مواسير PP-R ( أ )", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000153", "name": "حبيبات وصلات بداية تشغيل ج", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000157", "name": "هايش PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000161", "name": "كنسه كساره وصلات (ا)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000175", "name": "مجروش PPR ( ب ) غ صالح", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000176", "name": "مجروش PPR ( ج ) غ صالح", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000191", "name": "هايش متنوع", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000202", "name": "كنسة هايش PPH غير صالح", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000101", "name": "ناعم ناتج فلاتر", "rcode": "RFI100001", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000102", "name": "مجروش وصلات ابيض(ج)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000113", "name": "كتل رمادى مواسير", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000119", "name": "كتل ازرق P.E", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000122", "name": "كتل مواسير CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000124", "name": "زوائد كاوتش NR ( أ )", "rcode": "RRU100001", "rname": "NR", "src": "master", "classifications": []}, {"code": "WFM000125", "name": "كتل تنظيف وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000126", "name": "كتل وصلات بيضاء", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000133", "name": "كتل وصلات رمادى محروقة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000137", "name": "مجروش رمادى C0P0V0C", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000142", "name": "كتل PP-R اسود", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000156", "name": "مجروش PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000183", "name": "هايش مجروش وصلات CPVC ساخن", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000185", "name": "كتل هوفن معزول PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000198", "name": "زوائد هالك متنوع وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000199", "name": "حبيبات مخلطة P.E غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000212", "name": "حبيبات اينو فيبرCS1- 8820-GF غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000218", "name": "مجروش تنظيف غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000221", "name": "كنسة مجروش PPH", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000104", "name": "حبيبات وصلات بداية التشغيل", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000110", "name": "كنسة بودرة ملوثة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000117", "name": "مواسير محروقة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000120", "name": "كنسه حبيبات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000134", "name": "حبيبات وصلات زرقاء غير صالحة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000136", "name": "كتل رمادى وصلات CPVC", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000141", "name": "كنسة مجروش PP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000147", "name": "ناعم ناتج الفلتر ( اوميا )", "rcode": "RFI100002", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000155", "name": "كتل مواسير ابيض ب", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000169", "name": "مجروش برتقالى (ب)", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000171", "name": "مجروش وصلات ابيض ( ب )", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000178", "name": "مطحون برتقالى مصبوغ غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000179", "name": "مطحون رمادي غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000193", "name": "مجروش مواسير ابيض غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000201", "name": "هايش منشار مخلط PVC/ PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000207", "name": "ماسترباتش اسود غيرصالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000209", "name": "PPH حبيبات بداية تشغيل غير صالح", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000224", "name": "مجروش وصلات P.E غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000103", "name": "كنسة مجروش كسارات الوصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000135", "name": "زوائد وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000148", "name": "كتل الون PE مواسير", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000194", "name": "مجروش وصلات P.E أصفر 80 غير صالح", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000197", "name": "تيتانيوم غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000210", "name": "صبغة وصلات كريمى5411 غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000215", "name": "ماستر باتش ابيض طري غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000219", "name": "مجروش رمادي وصلات د/ث", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000106", "name": "كنسة زبالة الكسارة { أ }", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000109", "name": "مجروش مطحون ابيض غير صالح", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000111", "name": "هايش منشار { أ }", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000112", "name": "ناعم ناتج اوميا", "rcode": "RFI100002", "rname": "CaCO3 10 micron", "src": "master", "classifications": []}, {"code": "WFM000115", "name": "كنسة بودرة ملوثة (2 )", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000118", "name": "كتل غامق", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000138", "name": "كتل PP - R وصلات", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000150", "name": "كتل وصلات CPVC ( ج )", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000154", "name": "كتل مواسير رمادى ب", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000162", "name": "كنسه كساره وصلات (ب)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFm000163", "name": "كتل محروق مواسير", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFm000164", "name": "كتل PE غاز اصفر", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000170", "name": "كتل حشو احمر فيبر PPR", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000180", "name": "كتل غاز برتقالى PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000182", "name": "مجروش وصلات ابيض (ا)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000189", "name": "خامة كربون تالفة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000204", "name": "كتل محروقة وصلات متنوعة", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000105", "name": "مجروش PPH ( ج )", "rcode": "RPR100004", "rname": "PPB-N-Low melt", "src": "master", "classifications": []}, {"code": "WFM000107", "name": "كنسة بيارة", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000108", "name": "كتل تنظيف مواسير ( أ )", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000121", "name": "كتل اسود PE", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000123", "name": "عجينة كتل كاوتش (أ)", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000127", "name": "كتل وصلات رمادى", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000139", "name": "كنسة خامة PP-R", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000144", "name": "جردل بلاستيك هالك", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000152", "name": "كتل وصلات بيضاء ج", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000160", "name": "كتل مواسير ppr (ب)", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000195", "name": "كتل مخلطه ألوان وصلات", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000200", "name": "مجروش رمادي PVC غير صالح", "rcode": "RPV100001", "rname": "S-PVC 67", "src": "master", "classifications": []}, {"code": "WFM000205", "name": "سودPE كنسة مجروش", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000214", "name": "حبيبات PPR C TF 60 غير صالح", "rcode": "RPR100001", "rname": "PPR-N", "src": "master", "classifications": []}, {"code": "WFM000216", "name": "مجروش وصلات أبيض (ب)", "rcode": "RPV100002", "rname": "S-PVC 57", "src": "master", "classifications": []}, {"code": "WFM000222", "name": "بلاستيك متنوع", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}, {"code": "WFM000223", "name": "مجرى + صليبة PE مخلفات", "rcode": "RPE100005", "rname": "black PE 100", "src": "master", "classifications": []}], "materials": [{"code": "RPV100003", "name": "S-PVC 70", "price": ""}, {"code": "RPR100001", "name": "PPR-N", "price": 72960}, {"code": "RPV100002", "name": "S-PVC 57", "price": 52440}, {"code": "RPE100005", "name": "black PE 100", "price": 64980}, {"code": "RPR100004", "name": "PPB-N-Low melt", "price": 84360}, {"code": "RPV100001", "name": "S-PVC 67", "price": 46500.6}, {"code": "RFI100002", "name": "CaCO3 10 micron", "price": ""}, {"code": "RFI100001", "name": "CaCO3 10 micron", "price": 2679}, {"code": "RRU100001", "name": "NR", "price": 136800}]}</script>
 <script>
 (function(){
@@ -877,13 +947,14 @@ async function storeSet(key, value){
   }catch(e){ console.error('localStorage set failed', key, e); return false; }
 }
 
-const KEYS = { items:'items_v3', materials:'materials_v2', records:'records_v2', meta:'meta_v2', committee:'committee_v1' };
+const KEYS = { items:'items_v3', materials:'materials_v2', records:'records_v2', meta:'meta_v2', committee:'committee_v1', emailBook:'email_book_v1' };
 
 let STATE = { items: [], materials: [], records: [] };
 let META = { itemsSavedAt: null, materialsSavedAt: null };
 
 /* ---------------- Sheet columns / hidden columns / committee ---------------- */
 const SHEET_COLUMNS = [
+  { key:'code',     label:'كود الصنف',              width:'100px' },
   { key:'name',     label:'الصنف' },
   { key:'grade',    label:'الفئة',                 width:'60px' },
   { key:'cond',     label:'وصف الحالة' },
@@ -896,6 +967,12 @@ const SHEET_COLUMNS = [
 let HIDDEN_COLS = new Set();
 let COMMITTEE_MEMBERS = [];
 
+/* ---------------- Email address book (for the "send by email" modal) ---------------- */
+let EMAIL_BOOK = [];       // saved addresses, persisted across sessions
+let EMAIL_TEMP = [];       // addresses added for this send only (not persisted)
+let EMAIL_SELECTED = new Set(); // addresses currently checked in the modal
+let EMAIL_CTX = null;      // { captureElId, filenameBase, subjectTitle } for the pending send
+
 function visibleSheetColumns(hidden){
   const h = hidden || HIDDEN_COLS;
   return SHEET_COLUMNS.filter(c => !h.has(c.key));
@@ -906,12 +983,13 @@ const seedEl = document.getElementById('seed-data');
 const SEED = JSON.parse(seedEl.textContent);
 
 async function boot(){
-  const [items, materials, records, meta, committee] = await Promise.all([
+  const [items, materials, records, meta, committee, emailBook] = await Promise.all([
     storeGet(KEYS.items),
     storeGet(KEYS.materials),
     storeGet(KEYS.records),
     storeGet(KEYS.meta),
-    storeGet(KEYS.committee)
+    storeGet(KEYS.committee),
+    storeGet(KEYS.emailBook)
   ]);
 
   const restoredFromSave = !!(items || materials);
@@ -921,6 +999,7 @@ async function boot(){
   STATE.records = records || [];
   META = meta || META;
   COMMITTEE_MEMBERS = Array.isArray(committee) ? committee : [];
+  EMAIL_BOOK = Array.isArray(emailBook) ? emailBook : [];
 
   if(!items) await storeSet(KEYS.items, STATE.items);
   if(!materials) await storeSet(KEYS.materials, STATE.materials);
@@ -1511,7 +1590,8 @@ function renderTableHead(theadEl, hiddenColsSet, editable, onRemoveCol){
 function renderSheetTable(bodyEl, rows, hiddenColsSet){
   const cols = visibleSheetColumns(hiddenColsSet);
   const cellRenderers = {
-    name:     r => `${escapeHtml(r.name)}${r.code ? `<div class="item-code-tag">كود: ${escapeHtml(r.code)}</div>` : ''}`,
+    name:     r => escapeHtml(r.name),
+    code:     r => `<span class="code-cell">${escapeHtml(r.code || '—')}</span>`,
     grade:    r => `<span class="badge ${r.grade==='أ' ? 'a' : (r.grade==='ب' ? 'b':'')}">${escapeHtml(r.grade)}</span>`,
     cond:     r => escapeHtml(r.cond || '—'),
     pct:      r => (r.pct !== null && r.pct !== undefined ? r.pct+'%' : '—'),
@@ -1532,7 +1612,8 @@ function renderSheetTableEditable(){
   renderTableHead(document.getElementById('sheetThead'), HIDDEN_COLS, true, onSheetColumnRemoved);
   const cols = visibleSheetColumns(HIDDEN_COLS);
   const cellEditors = {
-    name:     (r, i) => `<div class="name-cell-wrap"><input type="text" class="cell-edit name-edit" data-ridx="${i}" data-field="name" value="${escapeHtml(r.name)}">${r.code ? `<div class="item-code-tag">كود: ${escapeHtml(r.code)}</div>` : ''}</div>`,
+    name:     (r, i) => `<input type="text" class="cell-edit name-edit" data-ridx="${i}" data-field="name" value="${escapeHtml(r.name)}">`,
+    code:     (r, i) => `<span class="code-cell">${escapeHtml(r.code || '—')}</span>`,
     grade:    (r, i) => r.matCode ? '<span class="badge">—</span>' : `<input type="text" class="cell-edit" style="width:56px; font-weight:800;" data-ridx="${i}" data-field="grade" value="${escapeHtml(r.grade || '')}">`,
     cond:     (r, i) => `<input type="text" class="cell-edit" data-ridx="${i}" data-field="cond" value="${escapeHtml(r.cond || '')}" placeholder="—">`,
     pct:      (r, i) => r.matCode ? '100%' : `<input type="number" step="0.1" min="0" max="100" class="cell-edit" data-ridx="${i}" data-field="pct" value="${r.pct ?? ''}">`,
@@ -1674,6 +1755,12 @@ function defaultSheetTitle(){
   return `اسعار استرشادية لخامات مجروشات عن شهر ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
 }
 
+function setExportDate(elId, dateObj){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  el.textContent = 'تاريخ الإصدار: ' + dateObj.toLocaleDateString('ar-EG', { year:'numeric', month:'long', day:'numeric' });
+}
+
 document.getElementById('btnBuildSheet').addEventListener('click', ()=>{
   if(SELECTED.size === 0 && SELECTED_MAT.size === 0){ toast('اختر صنفًا أو خامة واحدة على الأقل'); return; }
   CURRENT_SHEET = buildSheetRows(Array.from(SELECTED), Array.from(SELECTED_MAT));
@@ -1685,6 +1772,7 @@ document.getElementById('btnBuildSheet').addEventListener('click', ()=>{
   const titleInput = document.getElementById('sheetTitleInput');
   if(!titleInput.value) titleInput.value = defaultSheetTitle();
   document.getElementById('sheetTitleHeading').textContent = titleInput.value;
+  setExportDate('sheetExportDate', new Date());
   renderCommitteeGrid();
   renderSummary('sheetSummary', CURRENT_SHEET);
   document.getElementById('sheetPanel').style.display = 'block';
@@ -1755,7 +1843,7 @@ function exportToExcelStyled(rows, filename, title, options){
   const committee = options.committee || [];
   const logoDataUrl = options.logoDataUrl || null;
   const cols = visibleSheetColumns(hiddenCols);
-  const colWidths = { name:30, grade:9, cond:20, pct:10, rname:22, rcode:15, refPrice:18, price:18 };
+  const colWidths = { name:26, code:14, grade:9, cond:20, pct:10, rname:22, rcode:15, refPrice:18, price:18 };
 
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet('كشف التسعير', { views: [{ rightToLeft: true }] });
@@ -1791,7 +1879,7 @@ function exportToExcelStyled(rows, filename, title, options){
   // Sub-line: export date
   ws.mergeCells(r,1,r,headers.length);
   const subCell = ws.getCell(r,1);
-  subCell.value = 'تاريخ الإصدار: ' + new Date().toLocaleDateString('ar-EG');
+  subCell.value = 'تاريخ الإصدار: ' + (options.exportDate || new Date()).toLocaleDateString('ar-EG');
   subCell.font = { italic:true, size:10, color:{argb:'FF5B6469'} };
   subCell.alignment = { horizontal:'center' };
   ws.getRow(r).height = 18;
@@ -1812,7 +1900,8 @@ function exportToExcelStyled(rows, filename, title, options){
   r++;
 
   const cellValue = {
-    name: v => v.code ? `${v.name}  (كود: ${v.code})` : v.name,
+    name: v => v.name,
+    code: v => v.code || '—',
     grade: v => v.grade,
     cond: v => v.cond || '—',
     pct: v => (v.pct !== null && v.pct !== undefined) ? (v.pct/100) : null,
@@ -1937,16 +2026,20 @@ document.getElementById('btnExportExcel').addEventListener('click', ()=>{
   if(!CURRENT_SHEET.length) return;
   const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
   exportToExcelStyled(CURRENT_SHEET, 'كشف_تسعير_المجروشات', title, {
-    hiddenCols: HIDDEN_COLS, committee: COMMITTEE_MEMBERS, logoDataUrl: getExportedLogoDataUrl()
+    hiddenCols: HIDDEN_COLS, committee: COMMITTEE_MEMBERS, logoDataUrl: getExportedLogoDataUrl(), exportDate: new Date()
   });
   toast('تم تصدير ملف Excel');
 });
 document.getElementById('btnExportImage').addEventListener('click', ()=>{
   if(!CURRENT_SHEET.length) return;
+  setExportDate('sheetExportDate', new Date());
   exportToImage('sheetCapture', 'كشف_تسعير_المجروشات');
   toast('جارٍ تنزيل الصورة…');
 });
-document.getElementById('btnPrintSheet').addEventListener('click', ()=> window.print());
+document.getElementById('btnPrintSheet').addEventListener('click', ()=>{
+  setExportDate('sheetExportDate', new Date());
+  window.print();
+});
 
 /* ---------------- PDF export ----------------
    Renders the capture div (letterhead + table + committee + note) to a canvas,
@@ -2061,22 +2154,152 @@ async function exportToPDF(captureElId, filename){
   }
 }
 
-/* Downloads the PDF, then opens the person's email app with a ready subject/body.
-   Browsers can't attach a local file to a mailto: link automatically, so the person
-   attaches the file that was just downloaded before sending. */
-async function shareViaEmail(captureElId, filename, subjectTitle){
-  const saved = await exportToPDF(captureElId, filename);
-  if(!saved) return;
-  const subject = subjectTitle || 'كشف تسعير المجروشات';
-  const body = `مرفق كشف "${subject}" بصيغة PDF.\n\nملحوظة: من فضلك أرفق ملف "${saved}" الذي تم تنزيله على جهازك الآن قبل إرسال هذا البريد.`;
-  const mailto = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-  window.open(mailto, '_blank');
-  toast('تم تنزيل PDF — أرفقه في نافذة البريد التي فُتحت');
+/* ---------------- "Send by email" modal (Outlook Web compose) ----------------
+   IMPORTANT LIMITATION: no browser lets a web page attach a local file to a webmail
+   compose window automatically (this applies to Outlook Web, Gmail, Yahoo, etc. — it's
+   a security restriction, not something specific to this app). So the chosen file format
+   is downloaded first, and the person attaches that downloaded file inside the Outlook
+   tab that opens (drag & drop, or the paperclip button), then presses Send there. */
+function isValidEmail(v){ return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
+
+function renderEmailBook(){
+  const list = document.getElementById('emailBookList');
+  if(!list) return;
+  const rows = [];
+  EMAIL_BOOK.forEach(email=>{
+    const checked = EMAIL_SELECTED.has(email) ? 'checked' : '';
+    rows.push(`<div class="email-row"><input type="checkbox" class="email-check" data-email="${escapeHtml(email)}" ${checked}><span class="er-email">${escapeHtml(email)}</span><button type="button" class="er-remove" data-emailremove="${escapeHtml(email)}" title="حذف نهائي من القائمة">×</button></div>`);
+  });
+  EMAIL_TEMP.forEach(email=>{
+    const checked = EMAIL_SELECTED.has(email) ? 'checked' : '';
+    rows.push(`<div class="email-row"><input type="checkbox" class="email-check" data-email="${escapeHtml(email)}" ${checked}><span class="er-email">${escapeHtml(email)}</span><span class="er-tag">(غير محفوظ)</span><button type="button" class="er-remove" data-emailremovetemp="${escapeHtml(email)}" title="إزالة">×</button></div>`);
+  });
+  list.innerHTML = rows.length ? rows.join('') : `<div class="email-empty">لا يوجد إيميلات محفوظة بعد — أضف واحدًا تحت</div>`;
+
+  list.querySelectorAll('.email-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      if(cb.checked) EMAIL_SELECTED.add(cb.dataset.email);
+      else EMAIL_SELECTED.delete(cb.dataset.email);
+    });
+  });
+  list.querySelectorAll('[data-emailremove]').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const email = btn.dataset.emailremove;
+      EMAIL_BOOK = EMAIL_BOOK.filter(e=>e!==email);
+      EMAIL_SELECTED.delete(email);
+      await storeSet(KEYS.emailBook, EMAIL_BOOK);
+      renderEmailBook();
+    });
+  });
+  list.querySelectorAll('[data-emailremovetemp]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const email = btn.dataset.emailremovetemp;
+      EMAIL_TEMP = EMAIL_TEMP.filter(e=>e!==email);
+      EMAIL_SELECTED.delete(email);
+      renderEmailBook();
+    });
+  });
 }
+
+document.getElementById('btnAddEmail').addEventListener('click', async ()=>{
+  const input = document.getElementById('newEmailInput');
+  const email = input.value.trim();
+  if(!email){ toast('اكتب إيميل أولًا'); return; }
+  if(!isValidEmail(email)){ toast('صيغة الإيميل غير صحيحة'); return; }
+  if(EMAIL_BOOK.includes(email) || EMAIL_TEMP.includes(email)){
+    EMAIL_SELECTED.add(email);
+    input.value = '';
+    renderEmailBook();
+    return;
+  }
+  const save = document.getElementById('saveEmailCheck').checked;
+  if(save){
+    EMAIL_BOOK.push(email);
+    await storeSet(KEYS.emailBook, EMAIL_BOOK);
+  } else {
+    EMAIL_TEMP.push(email);
+  }
+  EMAIL_SELECTED.add(email);
+  input.value = '';
+  renderEmailBook();
+});
+document.getElementById('newEmailInput').addEventListener('keydown', (e)=>{
+  if(e.key === 'Enter'){ e.preventDefault(); document.getElementById('btnAddEmail').click(); }
+});
+
+function openEmailModal(captureElId, filenameBase, subjectTitle){
+  EMAIL_CTX = { captureElId, filenameBase, subjectTitle };
+  EMAIL_TEMP = [];
+  EMAIL_SELECTED = new Set(EMAIL_BOOK); // saved addresses are pre-checked by default
+  renderEmailBook();
+  document.getElementById('emailModal').classList.add('show');
+}
+document.getElementById('emailModalCancel').addEventListener('click', ()=>{
+  document.getElementById('emailModal').classList.remove('show');
+});
+
+/* Pulls "شهر ..." out of the sheet's own title when possible, so the email always
+   names the month the report is actually for (falls back to the current month). */
+function monthYearFromTitle(title){
+  if(title){
+    const m = title.match(/عن شهر\s+(.+)$/);
+    if(m) return m[1].trim();
+  }
+  const monthNames = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+  const now = new Date();
+  return `${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+document.getElementById('emailModalSend').addEventListener('click', async ()=>{
+  if(!EMAIL_CTX) return;
+  const { captureElId, filenameBase, subjectTitle } = EMAIL_CTX;
+  const format = document.querySelector('input[name="emailFormat"]:checked').value;
+  const dateElId = captureElId === 'sheetCapture' ? 'sheetExportDate' : 'recordExportDate';
+
+  let savedFile = null;
+  if(format === 'pdf'){
+    setExportDate(dateElId, new Date());
+    savedFile = await exportToPDF(captureElId, filenameBase);
+  } else if(format === 'image'){
+    setExportDate(dateElId, new Date());
+    exportToImage(captureElId, filenameBase);
+    savedFile = filenameBase + '.png';
+  } else if(format === 'excel'){
+    if(captureElId === 'sheetCapture'){
+      const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
+      exportToExcelStyled(CURRENT_SHEET, filenameBase, title, {
+        hiddenCols: HIDDEN_COLS, committee: COMMITTEE_MEMBERS, logoDataUrl: getExportedLogoDataUrl(), exportDate: new Date()
+      });
+    } else if(ACTIVE_RECORD){
+      exportToExcelStyled(ACTIVE_RECORD.rows, filenameBase, ACTIVE_RECORD.title || ACTIVE_RECORD.label, {
+        hiddenCols: new Set(ACTIVE_RECORD.hiddenCols || []), committee: ACTIVE_RECORD.committee || [],
+        logoDataUrl: getExportedLogoDataUrl(), exportDate: new Date(ACTIVE_RECORD.date)
+      });
+    }
+    savedFile = filenameBase + '.xlsx';
+  }
+
+  const monthYear = monthYearFromTitle(subjectTitle);
+  const subject = subjectTitle || 'كشف تسعير المجروشات';
+  const body =
+    `<div style="font-size:14pt;">` +
+    `<b>السادة الزملاء</b><br>` +
+    `<b>تحية طيبة وبعد....</b><br><br>` +
+    `مرفق الي سيادتكم ملف الاسعار الاسترشادية عن شهر ${escapeHtml(monthYear)}<br><br>` +
+    `<b>ولكم خالص الشكر والتقدير</b>` +
+    `</div>`;
+
+  const to = Array.from(EMAIL_SELECTED).join(',');
+  const outlookComposeUrl = `https://outlook.office.com/mail/deeplink/compose?to=${encodeURIComponent(to)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+  window.open(outlookComposeUrl, '_blank');
+  document.getElementById('emailModal').classList.remove('show');
+  toast(savedFile ? `تم تنزيل ${savedFile} — أرفقه في نافذة Outlook قبل الإرسال` : 'افتح Outlook وأرفق الملف يدويًا');
+});
 
 document.getElementById('btnExportPdf').addEventListener('click', ()=>{
   if(!CURRENT_SHEET.length) return;
   const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
+  setExportDate('sheetExportDate', new Date());
   toast('جارٍ تجهيز PDF…');
   exportToPDF('sheetCapture', 'كشف_تسعير_المجروشات').then(saved=>{
     if(saved) toast('تم تصدير ملف PDF');
@@ -2085,7 +2308,7 @@ document.getElementById('btnExportPdf').addEventListener('click', ()=>{
 document.getElementById('btnEmailPdf').addEventListener('click', ()=>{
   if(!CURRENT_SHEET.length) return;
   const title = document.getElementById('sheetTitleInput').value || defaultSheetTitle();
-  shareViaEmail('sheetCapture', 'كشف_تسعير_المجروشات', title);
+  openEmailModal('sheetCapture', 'كشف_تسعير_المجروشات', title);
 });
 
 /* ---------------- Monthly records ---------------- */
@@ -2166,6 +2389,7 @@ function openRecordView(id){
   document.getElementById('recordViewTitle').textContent = rec.label;
   document.getElementById('recordViewMeta').textContent = `${new Date(rec.date).toLocaleString('ar-EG')} — ${rec.rows.length} سطر`;
   document.getElementById('recordTitleHeading').textContent = rec.title || rec.label;
+  setExportDate('recordExportDate', new Date(rec.date));
   renderTableHead(document.getElementById('recordThead'), recHiddenCols, false, null);
   renderSheetTable(document.getElementById('recordViewBody'), rec.rows, recHiddenCols);
   document.getElementById('recordCommitteeGrid').innerHTML = committeeCardsHtml(recCommittee, false);
@@ -2180,7 +2404,8 @@ document.getElementById('btnExportRecordExcel').addEventListener('click', ()=>{
   exportToExcelStyled(ACTIVE_RECORD.rows, ACTIVE_RECORD.label.replace(/\s+/g,'_'), ACTIVE_RECORD.title || ACTIVE_RECORD.label, {
     hiddenCols: new Set(ACTIVE_RECORD.hiddenCols || []),
     committee: ACTIVE_RECORD.committee || [],
-    logoDataUrl: getExportedLogoDataUrl()
+    logoDataUrl: getExportedLogoDataUrl(),
+    exportDate: new Date(ACTIVE_RECORD.date)
   });
   toast('تم تصدير ملف Excel');
 });
@@ -2198,7 +2423,7 @@ document.getElementById('btnExportRecordPdf').addEventListener('click', ()=>{
 });
 document.getElementById('btnEmailRecordPdf').addEventListener('click', ()=>{
   if(!ACTIVE_RECORD) return;
-  shareViaEmail('recordCapture', ACTIVE_RECORD.label.replace(/\s+/g,'_'), ACTIVE_RECORD.title || ACTIVE_RECORD.label);
+  openEmailModal('recordCapture', ACTIVE_RECORD.label.replace(/\s+/g,'_'), ACTIVE_RECORD.title || ACTIVE_RECORD.label);
 });
 document.getElementById('btnPrintRecord').addEventListener('click', ()=> window.print());
 
